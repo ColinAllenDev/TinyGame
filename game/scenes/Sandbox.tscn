@@ -1,0 +1,33 @@
+[gd_scene load_steps=5 format=3 uid="uid://bd0nw8s0qrjwr"]
+
+[ext_resource type="PackedScene" uid="uid://dj1braoupdwvx" path="res://scenes/Player.tscn" id="1_rvcpp"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_60ykr"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_xora3"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1n402"]
+albedo_color = Color(0.290196, 0.290196, 0.290196, 1)
+
+[node name="Sandbox" type="Node3D"]
+
+[node name="Floor" type="StaticBody3D" parent="."]
+
+[node name="Collider" type="CollisionShape3D" parent="Floor"]
+transform = Transform3D(20, 0, 0, 0, 1, 0, 0, 0, 15, 0, 0, 0)
+shape = SubResource("BoxShape3D_60ykr")
+
+[node name="Mesh" type="MeshInstance3D" parent="Floor"]
+transform = Transform3D(20, 0, 0, 0, 1, 0, 0, 0, 15, 0, 0, 0)
+mesh = SubResource("BoxMesh_xora3")
+surface_material_override/0 = SubResource("StandardMaterial3D_1n402")
+
+[node name="PlayerController" parent="." instance=ExtResource("1_rvcpp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.49986, 0)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.999998, 0.0015661, 0.000770573, -3.85977e-08, -0.441506, 0.897258, 0.00174541, 0.897257, 0.441505, 0, 0, 0)
+light_color = Color(0.972549, 0.913725, 0.768627, 1)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.908567, 0.41774, 0, -0.41774, 0.908567, 0, 7.28286, 12.4811)
