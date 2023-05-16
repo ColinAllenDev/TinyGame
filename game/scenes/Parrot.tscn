@@ -1,0 +1,28 @@
+[gd_scene load_steps=2 format=3 uid="uid://bfwm7obg06tjb"]
+
+[ext_resource type="PackedScene" uid="uid://wi0tf128ywki" path="res://assets/models/Parrot.glb" id="1_xwpm1"]
+
+[node name="Parrot" instance=ExtResource("1_xwpm1")]
+
+[node name="Skeleton3D" parent="Rig" index="0"]
+bones/1/position = Vector3(1.36322e-09, 0.583967, -0.0899841)
+bones/1/scale = Vector3(1, 0.927053, 1)
+bones/2/rotation = Quaternion(-0.751144, -5.74904e-08, -1.10824e-07, 0.660138)
+bones/2/scale = Vector3(1, 1.00426, 1)
+bones/3/rotation = Quaternion(-0.727238, -8.19438e-08, -9.40463e-08, 0.686386)
+bones/3/scale = Vector3(1, 1.00135, 1)
+bones/4/rotation = Quaternion(-0.333796, -0.0278365, -0.0438334, 0.941214)
+bones/4/scale = Vector3(1, 0.961592, 1)
+bones/5/rotation = Quaternion(-0.500684, -0.020546, -0.0370021, 0.864595)
+bones/5/scale = Vector3(1, 1.00327, 1)
+bones/6/rotation = Quaternion(0.00567124, -0.478421, 0.878108, 0.0026175)
+bones/7/rotation = Quaternion(-0.00567171, -0.478421, 0.878108, -0.00261764)
+bones/8/position = Vector3(0.185945, -0.21519, 0.0858691)
+bones/8/rotation = Quaternion(-1.94817e-07, 6.61744e-24, 1, 0)
+bones/8/scale = Vector3(1, 0.927053, 1)
+bones/9/position = Vector3(-0.185946, -0.21519, 0.085869)
+bones/9/rotation = Quaternion(-4.38214e-08, -9.92617e-24, 1, 0)
+bones/9/scale = Vector3(1, 0.927053, 1)
+
+[node name="AnimationPlayer" parent="." index="1"]
+playback_process_mode = 0

@@ -1,21 +1,15 @@
-[gd_scene load_steps=4 format=3 uid="uid://dj1braoupdwvx"]
+[gd_scene load_steps=3 format=3 uid="uid://dj1braoupdwvx"]
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_5qui5"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yh7ar"]
-albedo_color = Color(0.384314, 0.294118, 1, 1)
+[ext_resource type="PackedScene" uid="uid://bfwm7obg06tjb" path="res://scenes/Parrot.tscn" id="1_i71d7"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_yn878"]
 
 [node name="PlayerController" type="PlayerController"]
-max_speed = 500.0
+max_speed = 8.0
 
 [node name="Pivot" type="Node3D" parent="."]
 
-[node name="Character" type="MeshInstance3D" parent="Pivot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("CapsuleMesh_5qui5")
-surface_material_override/0 = SubResource("StandardMaterial3D_yh7ar")
+[node name="Parrot" parent="Pivot" instance=ExtResource("1_i71d7")]
 
 [node name="Collider" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

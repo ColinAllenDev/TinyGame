@@ -5,14 +5,23 @@
 
 namespace godot 
 {
+    class Input;
+    
     class PlayerController : public CharacterBody3D
     {
         GDCLASS(PlayerController, CharacterBody3D)
     private:
+        // Input
+        double input_deadzone;
+        double movement_deadzone;
+        Vector2 input_direction;
+        Input* input;
+
+        // Movement/Physics
         double max_speed;
-        Vector2 input_direction = Vector2(0.0f, 0.0f);
-        Vector3 current_direction = Vector3(0.0f, 0.0f ,0.0f);
-        Vector3 current_velocity = Vector3(0.0f, 0.0f ,0.0f);
+        double max_acceleration;
+        Vector3 movement_direction;
+        Vector3 current_velocity;
     protected:
         static void _bind_methods();
     public:
@@ -23,8 +32,15 @@ namespace godot
         void _process(double delta);
         void _physics_process(double delta);
 
+        double get_input_deadzone() const;
+        void set_input_deadzone(const double p_input_deadzone);
+        double get_movement_deadzone() const;
+        void set_movement_deadzone(const double p_movement_deadzone);
+
         double get_max_speed() const;
         void set_max_speed(const double p_speed);
+        double get_max_acceleration() const;
+        void set_max_acceleration(const double p_acceleration);
     };  
 }
 
