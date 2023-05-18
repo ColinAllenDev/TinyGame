@@ -14,14 +14,14 @@ env = SConscript("godot-cpp/SConstruct")
 
 # tweak this if you want to use different folders, or more folders, to store your source code in.
 env.Append(CPPPATH=["src/"])
-sources = Glob("src/player/*.cpp")
+sources = Glob("src/*.cpp")
 
 # TODO: Add conifguration for multiple extensions
 
 # MacOs Configuration
 if env["platform"] == "macos":
     library = env.SharedLibrary(
-        "game/bin/playercontroller.{}.{}.framework/playercontroller.{}.{}".format(
+        "game/bin/tinygame.{}.{}.framework/tinygame.{}.{}".format(
             env["platform"], env["target"], env["platform"], env["target"]
         ),
         source=sources,
@@ -29,7 +29,7 @@ if env["platform"] == "macos":
 # Windows and Unix Configuration
 else:
     library = env.SharedLibrary(
-        "game/bin/playercontroller{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+        "game/bin/tinygame{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
         source=sources,
     )
 

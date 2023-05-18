@@ -1,6 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://bd0nw8s0qrjwr"]
-
-[ext_resource type="PackedScene" uid="uid://dj1braoupdwvx" path="res://scenes/Player.tscn" id="1_rvcpp"]
+[gd_scene load_steps=4 format=3 uid="uid://bd0nw8s0qrjwr"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_60ykr"]
 
@@ -10,6 +8,8 @@
 albedo_color = Color(0.290196, 0.290196, 0.290196, 1)
 
 [node name="Sandbox" type="Node3D"]
+
+[node name="GameManager" type="GameManager" parent="."]
 
 [node name="Floor" type="StaticBody3D" parent="."]
 
@@ -28,6 +28,3 @@ light_color = Color(0.972549, 0.913725, 0.768627, 1)
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.908567, 0.41774, 0, -0.41774, 0.908567, 0, 7.28286, 12.4811)
-
-[node name="PlayerController" parent="." instance=ExtResource("1_rvcpp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.49986, 0)

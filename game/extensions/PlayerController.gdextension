@@ -1,7 +1,0 @@
-[configuration]
-
-entry_symbol = "library_init"
-
-[libraries]
-
-linux.debug.x86_64 = "res://bin/libplayercontroller.linux.template_debug.x86_64.so"
