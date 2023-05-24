@@ -1,16 +1,22 @@
-[gd_scene load_steps=3 format=3 uid="uid://dj1braoupdwvx"]
+[gd_scene load_steps=4 format=3 uid="uid://dj1braoupdwvx"]
 
-[ext_resource type="PackedScene" uid="uid://bfwm7obg06tjb" path="res://scenes/Parrot.tscn" id="1_i71d7"]
+[ext_resource type="Material" uid="uid://1j6bwidm65wj" path="res://assets/materials/Player.tres" id="1_ylt6d"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_yn878"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_koqa0"]
+size = Vector3(1, 2, 1)
 
-[node name="PlayerController" type="PlayerController"]
-max_speed = 8.0
+[sub_resource type="BoxMesh" id="BoxMesh_8u4mi"]
+size = Vector3(1, 2, 1)
 
-[node name="Pivot" type="Node3D" parent="."]
+[node name="Player" type="Player"]
 
-[node name="Parrot" parent="Pivot" instance=ExtResource("1_i71d7")]
+[node name="PlayerController" type="PlayerController" parent="."]
+max_acceleration = 90.0
 
-[node name="Collider" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-shape = SubResource("CapsuleShape3D_yn878")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PlayerController"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00146502, 2.98023e-08, 0.00196934)
+shape = SubResource("BoxShape3D_koqa0")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="PlayerController"]
+material_override = ExtResource("1_ylt6d")
+mesh = SubResource("BoxMesh_8u4mi")

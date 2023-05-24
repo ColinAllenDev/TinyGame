@@ -2,11 +2,14 @@
 
 #include <gdextension_interface.h>
 #include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
 
-#include "PlayerController.h"
+#include "InputManager.h"
 #include "GameManager.h"
+#include "Player.h"
+#include "PlayerController.h"
 
 using namespace godot;
 
@@ -14,8 +17,10 @@ void initialize_module(ModuleInitializationLevel p_level)
 {
     if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) return;
 
-    ClassDB::register_class<PlayerController>();
+    ClassDB::register_class<InputManager>();
     ClassDB::register_class<GameManager>();
+    ClassDB::register_class<Player>();
+    ClassDB::register_class<PlayerController>();
 }
 
 void uninitialize_module(ModuleInitializationLevel p_level) 

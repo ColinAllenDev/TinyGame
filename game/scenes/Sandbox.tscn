@@ -1,30 +1,64 @@
-[gd_scene load_steps=4 format=3 uid="uid://bd0nw8s0qrjwr"]
+[gd_scene load_steps=9 format=3 uid="uid://bd0nw8s0qrjwr"]
+
+[ext_resource type="Material" uid="uid://cy0xxq3gsdkqu" path="res://assets/materials/Sand.tres" id="1_vwa2e"]
+[ext_resource type="PackedScene" uid="uid://dj1braoupdwvx" path="res://scenes/Player.tscn" id="1_x4bf6"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_ftctr"]
+sky_top_color = Color(0.278431, 0.592157, 0.929412, 1)
+sky_horizon_color = Color(0.921569, 0.92549, 0.929412, 1)
+ground_bottom_color = Color(0.278431, 0.592157, 0.929412, 1)
+ground_horizon_color = Color(0.921569, 0.92549, 0.929412, 1)
+
+[sub_resource type="Sky" id="Sky_btov8"]
+sky_material = SubResource("ProceduralSkyMaterial_ftctr")
+process_mode = 1
+
+[sub_resource type="Environment" id="Environment_cjral"]
+background_mode = 2
+sky = SubResource("Sky_btov8")
+ambient_light_source = 3
+ambient_light_color = Color(0.501961, 0.501961, 0.501961, 1)
+ambient_light_sky_contribution = 0.25
+ambient_light_energy = 3.5
+tonemap_mode = 2
+tonemap_white = 1.55
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_60ykr"]
+size = Vector3(40, 1, 20)
 
 [sub_resource type="BoxMesh" id="BoxMesh_xora3"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1n402"]
-albedo_color = Color(0.290196, 0.290196, 0.290196, 1)
+albedo_color = Color(0.788235, 0.788235, 0.788235, 1)
 
 [node name="Sandbox" type="Node3D"]
 
-[node name="GameManager" type="GameManager" parent="."]
+[node name="Player" parent="." instance=ExtResource("1_x4bf6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.9057, 1.5, -0.0542412)
 
-[node name="Floor" type="StaticBody3D" parent="."]
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.759237, 0.650814, 0, -0.650814, 0.759237, 0, 15, 19)
 
-[node name="Collider" type="CollisionShape3D" parent="Floor"]
-transform = Transform3D(20, 0, 0, 0, 1, 0, 0, 0, 15, 0, 0, 0)
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_cjral")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, 0.5, -0.5, 0, 10, 0)
+light_color = Color(0.972549, 0.913725, 0.768627, 1)
+shadow_enabled = true
+directional_shadow_fade_start = 0.594
+
+[node name="Court" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.11331, -9.53674e-07, -0.0651512)
+
+[node name="Collider" type="CollisionShape3D" parent="Court"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0451641, -0.0334234, 0.0791721)
 shape = SubResource("BoxShape3D_60ykr")
 
-[node name="Mesh" type="MeshInstance3D" parent="Floor"]
-transform = Transform3D(20, 0, 0, 0, 1, 0, 0, 0, 15, 0, 0, 0)
+[node name="Mesh" type="MeshInstance3D" parent="Court"]
+transform = Transform3D(40, 0, 0, 0, 1, 0, 0, 0, 20, 0, 0, 0)
+material_override = ExtResource("1_vwa2e")
 mesh = SubResource("BoxMesh_xora3")
 surface_material_override/0 = SubResource("StandardMaterial3D_1n402")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(-0.999998, 0.0015661, 0.000770573, -3.85977e-08, -0.441506, 0.897258, 0.00174541, 0.897257, 0.441505, 0, 0, 0)
-light_color = Color(0.972549, 0.913725, 0.768627, 1)
-
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.908567, 0.41774, 0, -0.41774, 0.908567, 0, 7.28286, 12.4811)
+[node name="GameManager" type="GameManager" parent="."]

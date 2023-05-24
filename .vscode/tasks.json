@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "group": "build",
+            "type": "shell",
+            "command": "scons",
+            "args": [
+                "platform=linux",
+                "dev_build=yes",
+            ]
+        }
+    ]
+}

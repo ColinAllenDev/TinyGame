@@ -5,6 +5,8 @@
         "cmath": "cpp",
         "numeric": "cpp",
         "ratio": "cpp",
-        "cstdlib": "cpp"
+        "cstdlib": "cpp",
+        "type_traits": "cpp",
+        "istream": "cpp"
     }
 }

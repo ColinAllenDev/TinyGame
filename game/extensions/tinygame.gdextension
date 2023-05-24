@@ -4,4 +4,4 @@ entry_symbol = "library_init"
 
 [libraries]
 
-linux.debug.x86_64 = "res://bin/libtinygame.linux.template_debug.x86_64.so"
+linux.debug.x86_64 = "res://bin/libtinygame.linux.template_debug.dev.x86_64.so"
