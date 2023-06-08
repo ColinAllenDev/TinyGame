@@ -1,4 +1,5 @@
 #include "PlayerController.h"
+#include "Player.h"
 
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/classes/engine.hpp>
@@ -51,6 +52,8 @@ PlayerController::PlayerController()
 void PlayerController::_ready() 
 {
     if (Engine::get_singleton()->is_editor_hint()) return;
+
+    player = (Player*)get_parent();
 }
 
 void PlayerController::_process(double delta) 
@@ -101,6 +104,12 @@ void PlayerController::_physics_process(double delta)
 
     set_velocity(current_velocity);
     move_and_slide();
+
+
+    // For testing purposes
+    if (is_on_floor() && input->is_action_pressed("strike")) {
+        serve();
+    }
 }
 
 void PlayerController::serve() 
@@ -114,12 +123,13 @@ void PlayerController::serve()
 void PlayerController::handle_input() 
 {
     input = Input::get_singleton();
+    int _id = player->get_player_id();
 
     // Movement
     input_direction.x =
-        input->get_action_strength("move_right") - input->get_action_strength("move_left");
+        input->get_action_strength("move_right_"+String::num_int64(_id)) - input->get_action_strength("move_left_"+String::num_int64(_id));
     input_direction.y =
-        input->get_action_strength("move_down") - input->get_action_strength("move_up");
+        input->get_action_strength("move_down_"+String::num_int64(_id)) - input->get_action_strength("move_up_"+String::num_int64(_id));
 }
 
 #pragma region Getters-Setters

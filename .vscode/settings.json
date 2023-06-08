@@ -7,6 +7,12 @@
         "ratio": "cpp",
         "cstdlib": "cpp",
         "type_traits": "cpp",
-        "istream": "cpp"
+        "istream": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "vector": "cpp",
+        "ostream": "cpp"
     }
 }

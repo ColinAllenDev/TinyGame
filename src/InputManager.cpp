@@ -1,12 +1,21 @@
 #include "InputManager.h"
+#include "GameManager.h"
 
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/classes/input.hpp>
 #include <godot_cpp/classes/input_map.hpp>
 #include <godot_cpp/classes/input_event.hpp>
+#include <godot_cpp/classes/input_event_joypad_button.hpp>
+#include <godot_cpp/classes/input_event_joypad_motion.hpp>
+#include <godot_cpp/classes/input_event_key.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/variant/callable.hpp>
+#include <godot_cpp/variant/string.hpp>
+#include <godot_cpp/classes/scene_tree.hpp>
+#include <godot_cpp/classes/window.hpp>
+#include <godot_cpp/variant/node_path.hpp>
+#include <godot_cpp/templates/hash_map.hpp>
 
 using namespace godot;
 
@@ -18,10 +27,21 @@ void InputManager::_bind_methods()
 
     // Reminder here to always bind your methods if you need to reference them (in my case using the input->connect method)
     ClassDB::bind_method(D_METHOD("_on_joy_connection_changed", "device", "connected"), &InputManager::_on_joy_connection_changed);
+    
+    // Signals
+    ADD_SIGNAL(MethodInfo("input_request_player_join", PropertyInfo(Variant::INT, "p_id")));
 }
 
 InputManager::InputManager() 
 {
+
+} 
+
+void InputManager::_ready() 
+{
+    /// RUNTIME LOGIC ///
+    if (Engine::get_singleton()->is_editor_hint()) return;
+    
     // Set defaults
     input_deadzone = 0.1;
 
@@ -41,15 +61,32 @@ InputManager::InputManager()
     // Connect 'joy_connection_changed' signal to _on_joy_connection_changed method
     int8_t _ret = input->connect("joy_connection_changed", Callable(this, "_on_joy_connection_changed"));
     if (_ret != 0) UtilityFunctions::print("Error {", _ret, "} connecting 'Input' signed '_on_joy_connection_changed.");
-
-    // Print current number of devices
-    if (Engine::get_singleton()->is_editor_hint()) return;
+    
     UtilityFunctions::print("InputManager Initialized with ", input_devices.size(), " devices.");
+    
+    for (int i = 0; i < input_map->get_actions().size(); i++) {
+        UtilityFunctions::print("Input Action [", i, "]: ", input_map->get_actions()[i]);
+    }
+
+    game_manager = get_tree()->get_current_scene()->get_node<GameManager>("GameManager");
 }
 
-InputManager::~InputManager() 
+void InputManager::_input(Ref<InputEvent> event) 
 {
+    UtilityFunctions::print(event->as_text());
+
+    if (event->is_action_pressed("start")) 
+    {
+        if (game_manager->get_game_state() == GameState::AwaitPlayers) 
+        {
+            int p_id = event->get_device();
+            if (event->get_class() == "InputEventJoypadButton") p_id++;
+            input_request_player_join(p_id);
+        }
+    }
 }
+
+
 
 void InputManager::_on_joy_connection_changed(int device, bool connected) 
 {   
@@ -78,24 +115,20 @@ bool InputManager::is_device_connected(int device_id)
     return false;
 }
 
-void InputManager::_input(Ref<InputEvent> event) 
-{
-    if (event->is_pressed()) {
-        UtilityFunctions::print("InputMap Length: ", input_map->get_actions().size());
-    }
-}
-
 void InputManager::add_device(InputDevice device) 
 {
     // Add to input_devices list
     input_devices.append(device);
 
     // Input Mapping
-    // TODO: Definetly refactor this
-    input_map->add_action("move_right_"+device.id, input_deadzone);
-    input_map->add_action("move_left_"+device.id, input_deadzone);
-    input_map->add_action("move_up_"+device.id, input_deadzone);
-    input_map->add_action("move_down_"+device.id, input_deadzone);
+    if (device.type == DeviceType::Joypad)
+    {
+        init_joypad_map(device);
+    }
+    else
+    {
+        init_keyboard_map(device);
+    }
 }
 
 void InputManager::remove_device(int device_id) 
@@ -114,10 +147,113 @@ void InputManager::remove_device(int device_id)
 
     // Input Mapping
     // TODO: Definetly refactor this
-    input_map->erase_action("move_right_"+device_id);
-    input_map->erase_action("move_left_"+device_id);
-    input_map->erase_action("move_up_"+device_id);
-    input_map->erase_action("move_down_"+device_id);
+    UtilityFunctions::print("Removing device: ", device_id);
+    input_map->erase_action("move_right_"+String::num_int64(device_id));
+    input_map->erase_action("move_left_"+String::num_int64(device_id));
+    input_map->erase_action("move_up_"+String::num_int64(device_id));
+    input_map->erase_action("move_down_"+String::num_int64(device_id));
+    input_map->erase_action("jump_"+String::num_int64(device_id));
+}
+
+HashMap<String, int> InputManager::init_joypad_map(InputDevice device) 
+{
+    HashMap<String, int> _map;
+    int _id = device.id;
+
+    auto* event_joypad_motion = new InputEventJoypadMotion();
+    auto* event_joypad_button = new InputEventJoypadButton();
+
+    // TODO : Refactor all this later
+    _map.insert("move_right_"+String::num_int64(_id), {JOY_AXIS_LEFT_X});
+    input_map->add_action("move_right_"+String::num_int64(_id));
+    event_joypad_motion->set_axis(JOY_AXIS_LEFT_X);
+    event_joypad_motion->set_axis_value(-1);
+    input_map->action_add_event("move_right_"+String::num_int64(_id), event_joypad_motion);
+    
+    _map.insert("move_left_"+String::num_int64(_id), {JOY_AXIS_LEFT_X});
+    input_map->add_action("move_left_"+String::num_int64(_id));
+    event_joypad_motion->set_axis(JOY_AXIS_LEFT_X);
+    event_joypad_motion->set_axis_value(+1);
+    input_map->action_add_event("move_left_"+String::num_int64(_id), event_joypad_motion);
+    
+    _map.insert("move_up_"+String::num_int64(_id), {JOY_AXIS_LEFT_Y});
+    input_map->add_action("move_up_"+String::num_int64(_id));
+    event_joypad_motion->set_axis(JOY_AXIS_LEFT_Y);
+    event_joypad_motion->set_axis_value(+1);
+    input_map->action_add_event("move_up_"+String::num_int64(_id), event_joypad_motion);
+    
+    _map.insert("move_down_"+String::num_int64(_id), {JOY_AXIS_LEFT_Y});
+    input_map->add_action("move_down_"+String::num_int64(_id));
+    event_joypad_motion->set_axis(JOY_AXIS_LEFT_Y);
+    event_joypad_motion->set_axis_value(-1);
+    input_map->action_add_event("move_down_"+String::num_int64(_id), event_joypad_motion);
+    
+    _map.insert("jump_"+String::num_int64(_id), JOY_BUTTON_A);
+    input_map->add_action("jump_"+String::num_int64(_id));
+    event_joypad_button->set_button_index(JOY_BUTTON_A);
+    input_map->action_add_event("jump_"+String::num_int64(_id), event_joypad_button);
+
+    _map.insert("start_"+String::num_int64(_id), JOY_BUTTON_START);
+    input_map->add_action("start_"+String::num_int64(_id));
+    event_joypad_button->set_button_index(JOY_BUTTON_START);
+    input_map->action_add_event("start_"+String::num_int64(_id), event_joypad_button);
+
+    _map.insert("strike_"+String::num_int64(_id), JOY_BUTTON_X);
+    input_map->add_action("strike_"+String::num_int64(_id));
+    event_joypad_button->set_button_index(JOY_BUTTON_X);
+    input_map->action_add_event("strike_"+String::num_int64(_id), event_joypad_button);
+
+    return _map;
+}
+
+HashMap<String, int> InputManager::init_keyboard_map(InputDevice device) 
+{
+    HashMap<String, int> _map;
+    int _id = device.id;
+
+    auto* event_keyboard = new InputEventKey();
+
+    _map.insert("move_right_"+String::num_int64(_id), {KEY_D});
+    input_map->add_action("move_right_"+String::num_int64(_id));
+    event_keyboard->set_keycode(KEY_D);
+    input_map->action_add_event("move_right_"+String::num_int64(_id), event_keyboard);
+    
+    _map.insert("move_left_"+String::num_int64(_id), {KEY_A});
+    input_map->add_action("move_left_"+String::num_int64(_id));
+    event_keyboard->set_keycode(KEY_A);
+    input_map->action_add_event("move_left_"+String::num_int64(_id), event_keyboard);
+    
+    _map.insert("move_up_"+String::num_int64(_id), {KEY_W});
+    input_map->add_action("move_up_"+String::num_int64(_id));
+    event_keyboard->set_keycode(KEY_W);
+    input_map->action_add_event("move_up_"+String::num_int64(_id), event_keyboard);
+    
+    _map.insert("move_down_"+String::num_int64(_id), {KEY_S});
+    input_map->add_action("move_down_"+String::num_int64(_id));
+    event_keyboard->set_keycode(KEY_S);
+    input_map->action_add_event("move_down_"+String::num_int64(_id), event_keyboard);
+    
+    _map.insert("jump_"+String::num_int64(_id), KEY_SPACE);
+    input_map->add_action("jump_"+String::num_int64(_id));
+    event_keyboard->set_keycode(KEY_SPACE);
+    input_map->action_add_event("jump_"+String::num_int64(_id), event_keyboard);
+
+    _map.insert("start_"+String::num_int64(_id), KEY_ENTER);
+    input_map->add_action("start_"+String::num_int64(_id));
+    event_keyboard->set_keycode(KEY_ENTER);
+    input_map->action_add_event("start_"+String::num_int64(_id), event_keyboard);
+
+    _map.insert("strike_"+String::num_int64(_id), KEY_F);
+    input_map->add_action("strike_"+String::num_int64(_id));
+    event_keyboard->set_keycode(KEY_F);
+    input_map->action_add_event("strike_"+String::num_int64(_id), event_keyboard);
+
+    return _map;
+}
+
+void InputManager::input_request_player_join(int p_id) 
+{
+    emit_signal("input_request_player_join", p_id);
 }
 
 double InputManager::get_input_deadzone() const

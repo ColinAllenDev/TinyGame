@@ -5,6 +5,7 @@
 
 namespace godot 
 {
+    class Player;
     class Input;
     class InputMap;
 
@@ -12,6 +13,8 @@ namespace godot
     {
         GDCLASS(PlayerController, CharacterBody3D)
     private:
+        Player* player;
+
         // Input
         Input* input;
         InputMap* input_map;

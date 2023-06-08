@@ -27,6 +27,7 @@ namespace godot
         PlayerState get_player_state() const;
         void set_player_state(PlayerState p_state);
         int get_player_id() const;
+        void set_player_id(const int p_id);
         int get_device_id() const;
         void set_device_id(const int p_device_id);
     };
