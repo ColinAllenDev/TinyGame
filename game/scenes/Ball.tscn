@@ -1,11 +1,14 @@
 [gd_scene load_steps=4 format=3 uid="uid://sr1nex76gyae"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_qtplt"]
+radius = 1.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eoacq"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_oe4j3"]
 material = SubResource("StandardMaterial3D_eoacq")
+radius = 1.0
+height = 2.0
 
 [node name="Ball" type="Node3D"]
 

@@ -8,6 +8,7 @@ namespace godot
 {
     class Player;
     class InputManager;
+    class ResourceLoader;
     class InputEvent;
     
     enum GameState {AwaitPlayers, MatchInProgress, MatchFinished};
@@ -19,6 +20,7 @@ namespace godot
         GameState game_state;
         HashMap<int, Player*> players;
         InputManager* input_manager;
+        ResourceLoader* resource_loader;
 
     protected:
         static void _bind_methods();
@@ -33,6 +35,7 @@ namespace godot
 
         // Listeners
         void _on_input_request_player_join(int p_id);
+        void _on_player_served(Vector3 p_position, Vector3 p_direction);
 
         // Getters and Setters
         GameState get_game_state() const;

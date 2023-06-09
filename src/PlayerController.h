@@ -14,6 +14,7 @@ namespace godot
         GDCLASS(PlayerController, CharacterBody3D)
     private:
         Player* player;
+        int player_id;
 
         // Input
         Input* input;
@@ -26,6 +27,7 @@ namespace godot
         double max_acceleration;
         double max_fall_acceleration;
         double jump_impulse;
+        Vector3 look_direction;
         Vector3 movement_direction;
         Vector3 aim_direction;
         Vector3 current_velocity;

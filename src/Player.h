@@ -7,7 +7,7 @@ namespace godot
 {
     class PlayerController;
 
-    enum PlayerState {Serving, Idle, Moving};
+    enum PlayerState {Serving, Moving, Idle};
 
     class Player : public Node3D 
     {
@@ -16,10 +16,12 @@ namespace godot
         PlayerState player_state;
         int player_id;
         int device_id;
+
+        int score;
     protected:
         static void _bind_methods();
     public:
-        Player() {}
+        Player();
         ~Player() {}
 
         void _ready();
@@ -30,6 +32,8 @@ namespace godot
         void set_player_id(const int p_id);
         int get_device_id() const;
         void set_device_id(const int p_device_id);
+        int get_player_score() const;
+        void set_player_score(const int p_score);
     };
 }
 

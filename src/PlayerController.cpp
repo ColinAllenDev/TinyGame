@@ -36,7 +36,9 @@ void PlayerController::_bind_methods()
     ClassDB::add_property("PlayerController", PropertyInfo(Variant::FLOAT, "jump_impulse"), "set_jump_impulse", "get_jump_impulse");
 
     // Signals
-    ADD_SIGNAL(MethodInfo("player_served", PropertyInfo(Variant::VECTOR3, "aim_direction")));
+    ADD_SIGNAL(MethodInfo("player_served", 
+        PropertyInfo(Variant::VECTOR3, "player_position"),
+        PropertyInfo(Variant::VECTOR3, "aim_direction")));
 }
 
 PlayerController::PlayerController() 
@@ -54,6 +56,7 @@ void PlayerController::_ready()
     if (Engine::get_singleton()->is_editor_hint()) return;
 
     player = (Player*)get_parent();
+    player_id = player->get_player_id();
 }
 
 void PlayerController::_process(double delta) 
@@ -95,7 +98,7 @@ void PlayerController::_physics_process(double delta)
         target_velocity.y = current_velocity.y - (max_fall_acceleration * (float)delta);
     }
 
-    if (is_on_floor() && input->is_action_pressed("jump")) 
+    if (is_on_floor() && input->is_action_pressed("jump_"+String::num(player_id))) 
     {
         target_velocity.y = jump_impulse;
     }
@@ -105,31 +108,36 @@ void PlayerController::_physics_process(double delta)
     set_velocity(current_velocity);
     move_and_slide();
 
-
-    // For testing purposes
-    if (is_on_floor() && input->is_action_pressed("strike")) {
-        serve();
+    if (input->is_action_pressed("strike_"+String::num(player_id))) {
+        if (is_on_floor() && player->get_player_state() == PlayerState::Serving)
+            serve();
     }
 }
 
 void PlayerController::serve() 
 {
-    aim_direction = Vector3(1.0, 0.0, 0.0);
+    // Temporary
+    Vector3 local_forward = get_transform().basis.xform(Vector3(0, 0, -1));
+    UtilityFunctions::print(local_forward);
+    
+    aim_direction = Vector3(0.5, 0.5, 0.0);
 
     // if player handles serve input, send out a signal that we served to other game entities
-    emit_signal("player_served", aim_direction);
+    emit_signal("player_served", get_position(), aim_direction); 
+
+    // TODO: Add check if player succesfully served
+    player->set_player_state(PlayerState::Moving); 
 }
 
 void PlayerController::handle_input() 
 {
     input = Input::get_singleton();
-    int _id = player->get_player_id();
-
+    
     // Movement
     input_direction.x =
-        input->get_action_strength("move_right_"+String::num_int64(_id)) - input->get_action_strength("move_left_"+String::num_int64(_id));
+        input->get_action_strength("move_right_"+String::num(player_id)) - input->get_action_strength("move_left_"+String::num(player_id));
     input_direction.y =
-        input->get_action_strength("move_down_"+String::num_int64(_id)) - input->get_action_strength("move_up_"+String::num_int64(_id));
+        input->get_action_strength("move_down_"+String::num(player_id)) - input->get_action_strength("move_up_"+String::num(player_id));
 }
 
 #pragma region Getters-Setters
