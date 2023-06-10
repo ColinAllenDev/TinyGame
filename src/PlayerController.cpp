@@ -1,5 +1,6 @@
 #include "PlayerController.h"
 #include "Player.h"
+#include "Ball.h"
 
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/classes/engine.hpp>
@@ -39,6 +40,11 @@ void PlayerController::_bind_methods()
     ADD_SIGNAL(MethodInfo("player_served", 
         PropertyInfo(Variant::VECTOR3, "player_position"),
         PropertyInfo(Variant::VECTOR3, "aim_direction")));
+
+    ADD_SIGNAL(MethodInfo("player_striked", 
+        PropertyInfo(Variant::VECTOR3, "player_position"),
+        PropertyInfo(Variant::VECTOR3, "aim_direction"),
+        PropertyInfo(Variant::FLOAT, "strike_force")));
 }
 
 PlayerController::PlayerController() 
@@ -69,9 +75,13 @@ void PlayerController::_process(double delta)
 
 void PlayerController::_physics_process(double delta) 
 {
+    // NOTE: Might need to move input logic to the main _process method as input might be missed
+    // during physics update.
+
     // Disables component logic outside gameplay
     if (Engine::get_singleton()->is_editor_hint()) return;
 
+    // Handle movement direction based on input
     if (input_direction.length() > movement_deadzone*sqrt(2.0f)) 
     {
         movement_direction = Vector3(input_direction.x, 0.0f, input_direction.y).normalized();
@@ -79,6 +89,7 @@ void PlayerController::_physics_process(double delta)
         movement_direction = Vector3(0.0f, 0.0f, 0.0f); 
     }
 
+    // Update our target velocity based on movement direction and speed
     Vector3 target_velocity = Vector3(movement_direction.x, 0.0f, movement_direction.z) * max_speed;
 
     float max_speed_delta = max_acceleration * (float)delta;
@@ -93,40 +104,39 @@ void PlayerController::_physics_process(double delta)
             max_speed_delta ? target_velocity.z : current_velocity.z + 
                 SIGN(target_velocity.z - current_velocity.z) * max_speed_delta;
 
+    // Player is falling
     if (!is_on_floor()) 
     {
         target_velocity.y = current_velocity.y - (max_fall_acceleration * (float)delta);
     }
-
+    
+    // Player is on the floor and pressing "jump" input
     if (is_on_floor() && input->is_action_pressed("jump_"+String::num(player_id))) 
     {
         target_velocity.y = jump_impulse;
     }
 
+    // Strike logic
+    if (input->is_action_pressed("strike_"+String::num(player_id))) {
+        // Player is serving
+        if (player->get_player_state() == PlayerState::Serving && is_on_floor())     
+        {
+            serve();
+        }
+
+        // Emit strike signal?
+        if (player->get_player_state() != PlayerState::Serving) 
+        {
+            strike();
+        }
+    }
+
+    // Set velocity on y axis
     current_velocity.y = target_velocity.y;
 
+    // Update movement based on velocity
     set_velocity(current_velocity);
     move_and_slide();
-
-    if (input->is_action_pressed("strike_"+String::num(player_id))) {
-        if (is_on_floor() && player->get_player_state() == PlayerState::Serving)
-            serve();
-    }
-}
-
-void PlayerController::serve() 
-{
-    // Temporary
-    Vector3 local_forward = get_transform().basis.xform(Vector3(0, 0, -1));
-    UtilityFunctions::print(local_forward);
-    
-    aim_direction = Vector3(0.5, 0.5, 0.0);
-
-    // if player handles serve input, send out a signal that we served to other game entities
-    emit_signal("player_served", get_position(), aim_direction); 
-
-    // TODO: Add check if player succesfully served
-    player->set_player_state(PlayerState::Moving); 
 }
 
 void PlayerController::handle_input() 
@@ -138,6 +148,26 @@ void PlayerController::handle_input()
         input->get_action_strength("move_right_"+String::num(player_id)) - input->get_action_strength("move_left_"+String::num(player_id));
     input_direction.y =
         input->get_action_strength("move_down_"+String::num(player_id)) - input->get_action_strength("move_up_"+String::num(player_id));
+}
+
+void PlayerController::serve() 
+{
+    // 1. Instantiate Ball in the air
+    Vector3 serve_direction = Vector3(0, 1, 0);
+    Vector3 serve_offset = Vector3(1.5f, 0, 0);
+    emit_signal("player_served", get_position() + serve_direction + serve_offset, serve_direction); 
+
+    // TODO: Add check if player succesfully served
+    player->set_player_state(PlayerState::Moving); 
+}
+
+void PlayerController::strike() 
+{
+    // Temporary
+    Vector3 strike_direction = Vector3(0.5, 0.5, 0);
+    float strike_force = 14.0f;
+
+    emit_signal("player_striked", get_position(), strike_direction, strike_force);
 }
 
 #pragma region Getters-Setters

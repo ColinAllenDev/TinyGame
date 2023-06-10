@@ -29,7 +29,6 @@ namespace godot
         double jump_impulse;
         Vector3 look_direction;
         Vector3 movement_direction;
-        Vector3 aim_direction;
         Vector3 current_velocity;
     protected:
         static void _bind_methods();
@@ -41,8 +40,11 @@ namespace godot
         void _process(double delta);
         void _physics_process(double delta);
         
-        void serve();
         void handle_input();
+
+        void serve();
+        void strike();
+        
 
         // Getters and Setters
         double get_movement_deadzone() const;

@@ -10,6 +10,7 @@ namespace godot
     class InputManager;
     class ResourceLoader;
     class InputEvent;
+    class RigidBody3D;
     
     enum GameState {AwaitPlayers, MatchInProgress, MatchFinished};
 
@@ -17,11 +18,11 @@ namespace godot
     {
         GDCLASS(GameManager, Node)
     private:
+        Node* game_scene;
         GameState game_state;
         HashMap<int, Player*> players;
         InputManager* input_manager;
         ResourceLoader* resource_loader;
-
     protected:
         static void _bind_methods();
     public:
@@ -29,6 +30,7 @@ namespace godot
         ~GameManager() {}
 
         void _ready();
+        void _process_physics(double delta);
 
         void add_player(int p_id);
         void remove_player(int p_id);      

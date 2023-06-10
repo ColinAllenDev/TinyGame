@@ -1,22 +1,35 @@
-[gd_scene load_steps=4 format=3 uid="uid://sr1nex76gyae"]
+[gd_scene load_steps=6 format=3 uid="uid://ckab2r0igxkfs"]
 
-[sub_resource type="SphereShape3D" id="SphereShape3D_qtplt"]
-radius = 1.0
+[sub_resource type="SphereShape3D" id="SphereShape3D_f1d1v"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eoacq"]
+[sub_resource type="SphereShape3D" id="SphereShape3D_03t37"]
+radius = 1.5
 
-[sub_resource type="SphereMesh" id="SphereMesh_oe4j3"]
-material = SubResource("StandardMaterial3D_eoacq")
-radius = 1.0
-height = 2.0
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4jyph"]
+transparency = 1
+blend_mode = 1
+albedo_color = Color(0.596078, 0, 0.74902, 0.47451)
 
-[node name="Ball" type="Node3D"]
+[sub_resource type="SphereMesh" id="SphereMesh_74y1h"]
+material = SubResource("StandardMaterial3D_4jyph")
+radius = 1.5
+height = 3.0
 
-[node name="RigidBody" type="RigidBody3D" parent="."]
+[sub_resource type="SphereMesh" id="SphereMesh_m5b46"]
 
-[node name="Collider" type="CollisionShape3D" parent="RigidBody"]
-shape = SubResource("SphereShape3D_qtplt")
+[node name="Ball" type="Ball"]
 
-[node name="Mesh" type="MeshInstance3D" parent="RigidBody"]
-mesh = SubResource("SphereMesh_oe4j3")
-skeleton = NodePath("")
+[node name="BodyCollider" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_f1d1v")
+
+[node name="StrikeArea" type="Area3D" parent="."]
+
+[node name="StrikeCollider" type="CollisionShape3D" parent="StrikeArea"]
+shape = SubResource("SphereShape3D_03t37")
+
+[node name="AreaMesh" type="MeshInstance3D" parent="StrikeArea"]
+mesh = SubResource("SphereMesh_74y1h")
+skeleton = NodePath("../..")
+
+[node name="BodyMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_m5b46")
