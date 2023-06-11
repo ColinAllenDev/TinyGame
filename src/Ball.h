@@ -24,9 +24,8 @@ namespace godot
         ~Ball() {}
 
         void _ready();
-        void _physics_process(double delta);
-
-        void _on_strike_area_entered(Area3D area);
+        
+        void _on_strike_area_entered(Node3D* body);
     };
 }
 

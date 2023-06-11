@@ -14,5 +14,8 @@
         "unordered_map": "cpp",
         "vector": "cpp",
         "ostream": "cpp"
+    },
+    "files.exclude": {
+        "src/*.os": true
     }
 }
