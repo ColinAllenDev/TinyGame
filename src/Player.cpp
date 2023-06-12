@@ -20,8 +20,7 @@ void Player::_bind_methods()
 Player::Player() 
 {
     score = 0;
-    // Temporary: initial state will be idle or moving
-    player_state = PlayerState::Serving;
+    player_state = PlayerState::Moving;
 }
 
 void Player::_ready() 

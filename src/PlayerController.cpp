@@ -18,6 +18,10 @@ void PlayerController::_bind_methods()
 {
     // Attributes
     ClassDB::bind_method(D_METHOD("get_player_id"), &PlayerController::get_player_id);
+    
+    ClassDB::bind_method(D_METHOD("get_strike_force"), &PlayerController::get_strike_force);
+    ClassDB::bind_method(D_METHOD("set_strike_force", "p_force"), &PlayerController::set_strike_force);
+    ClassDB::add_property("PlayerController", PropertyInfo(Variant::FLOAT, "strike_force"), "set_strike_force", "get_strike_force");
 
     // Movement
     ClassDB::bind_method(D_METHOD("get_movement_deadzone"), &PlayerController::get_movement_deadzone);
@@ -60,6 +64,8 @@ PlayerController::PlayerController()
 {
     // Action Defaults
     strike_rate = 0.24;
+    strike_force = 8.0;
+    strike_angle = 45.0;
     can_strike = true;
 
     // Movement Defaults
@@ -76,13 +82,15 @@ void PlayerController::_ready()
 
     // Get scene object and root node
     current_scene = get_tree()->get_current_scene();
-    player_instance = current_scene->get_node<Player>("Player");
+    player_instance = (Player*)get_parent();
     Node* controller_instance = player_instance->get_node<PlayerController>("PlayerController");
 
     // Component and Attribute Initializaton
     input = Input::get_singleton();
     strike_area = controller_instance->get_node<Area3D>("StrikeArea");
     player_id = player_instance->get_player_id();
+
+
 }
 
 void PlayerController::_process(double delta) 
@@ -105,6 +113,9 @@ void PlayerController::_physics_process(double delta)
     if (input_direction.length() > movement_deadzone*sqrt(2.0f)) 
     {
         movement_direction = Vector3(input_direction.x, 0.0f, input_direction.y).normalized();
+
+
+        look_at(get_position() + movement_direction);
     } else {
         movement_direction = Vector3(0.0f, 0.0f, 0.0f); 
     }
@@ -185,70 +196,18 @@ void PlayerController::serve()
 
 void PlayerController::strike() 
 {
-    // Temporary
-    Vector3 strike_direction = Vector3(0.5, 0.5, 0);
-    float strike_force = 14.0f;
+    // TODO: Handle strike direction stuff
+    strike_direction = Vector3(1, 0, 0);
+    strike_force = 12.0f;
+    strike_angle = Math::deg_to_rad(70.0); 
+    strike_direction.rotate(Vector3(0, 0, 1), strike_angle);
+    strike_direction.normalize();
+    
+    UtilityFunctions::print("Strike Vector: ", strike_direction);
 
     // Valid collision area logic performed by collision layers in godot
     if (strike_area->has_overlapping_areas()) 
     {
         emit_signal("player_striked", this, get_position(), strike_direction, strike_force);
     }
-}
-
-#pragma region Getters-Setters
-int PlayerController::get_player_id() const 
-{
-    return player_id;
-}
-
-double PlayerController::get_movement_deadzone() const 
-{
-    return movement_deadzone;
-}
-
-void   PlayerController::set_movement_deadzone(const double p_movement_deadzone) 
-{
-    movement_deadzone = p_movement_deadzone;
-}
-
-double PlayerController::get_max_speed() const 
-{
-    return max_speed;
-}
-
-void PlayerController::set_max_speed(double p_speed) 
-{
-    max_speed = p_speed;
-}
-
-double PlayerController::get_max_acceleration() const 
-{
-    return max_acceleration;
-}
-
-void PlayerController::set_max_acceleration(double p_acceleration) 
-{
-    max_acceleration = p_acceleration;
-}
-
-double PlayerController::get_max_fall_acceleration() const 
-{
-    return max_fall_acceleration;
-}
-
-void PlayerController::set_max_fall_acceleration(double p_acceleration) 
-{
-    max_fall_acceleration = p_acceleration;
-}
-
-double PlayerController::get_jump_impulse() const 
-{
-    return jump_impulse;
-}
-
-void PlayerController::set_jump_impulse(const double p_impulse) 
-{
-    jump_impulse = p_impulse;
-}
-#pragma endregion Getters-Setters
+}Vector3 strike_direction;

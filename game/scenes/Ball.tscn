@@ -21,6 +21,7 @@ radius = 1.0
 height = 2.0
 
 [node name="Ball" type="Ball"]
+mass = 0.65
 
 [node name="BodyCollider" type="CollisionShape3D" parent="."]
 shape = SubResource("SphereShape3D_f1d1v")

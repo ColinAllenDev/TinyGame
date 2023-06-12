@@ -20,6 +20,9 @@ namespace godot
 
         // Attributes
         int player_id;
+        double strike_rate;
+        double strike_force;
+        double strike_angle;
         
         // Components
         Player* player_instance;
@@ -31,7 +34,6 @@ namespace godot
         Vector2 input_direction;
 
         // Action Handling
-        double strike_rate;
         bool can_strike;
 
         // Movement/Physics
@@ -62,17 +64,19 @@ namespace godot
         void _on_can_strike() { can_strike = true; }
 
         // Getters and Setters
-        int get_player_id() const;
-        double get_movement_deadzone() const;
-        void set_movement_deadzone(const double p_movement_deadzone);
-        double get_max_speed() const;
-        void set_max_speed(const double p_speed);
-        double get_max_acceleration() const;
-        void set_max_acceleration(const double p_acceleration);
-        double get_max_fall_acceleration() const;
-        void set_max_fall_acceleration(const double p_acceleration);
-        double get_jump_impulse() const;
-        void set_jump_impulse(const double p_impulse);
+        int get_player_id() const { return player_id; }
+        double get_strike_force() const { return strike_force; }
+        void set_strike_force(double p_force) { strike_force = p_force; }
+        double get_movement_deadzone() const { return movement_deadzone; }
+        void set_movement_deadzone(const double p_movement_deadzone) { movement_deadzone = p_movement_deadzone; }
+        double get_max_speed() const { return max_speed; }
+        void set_max_speed(const double p_speed) { max_speed = p_speed; }
+        double get_max_acceleration() const { return max_acceleration; }
+        void set_max_acceleration(const double p_acceleration) { max_acceleration = p_acceleration; }
+        double get_max_fall_acceleration() const { return max_fall_acceleration; }
+        void set_max_fall_acceleration(const double p_acceleration) { max_fall_acceleration = p_acceleration; }
+        double get_jump_impulse() const { return jump_impulse; }
+        void set_jump_impulse(const double p_impulse) { jump_impulse = p_impulse; }
     };  
 }
 

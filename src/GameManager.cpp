@@ -54,7 +54,7 @@ void GameManager::add_player(int p_id)
 
     Ref<PackedScene> player_scene = resource_loader->load("res://scenes/Player.tscn");
     Node* player_node = player_scene->instantiate();
-    game_scene->call_deferred("add_child", player_node);
+    get_tree()->get_current_scene()->call_deferred("add_child", player_node);
 
     Player* player_class = (Player*)player_node;
     player_class->set_player_id(p_id);
@@ -65,11 +65,11 @@ void GameManager::add_player(int p_id)
 
     UtilityFunctions::print("Added Player: ", player_class->get_player_id());
 
+    // Temporary testing logic
     if (p_id == 0) {
         player_class->set_player_score(10);
+        player_class->set_player_state(PlayerState::Serving);
     }
-
-    UtilityFunctions::print("Player ", p_id, " Score: ", player_class->get_player_score());
 }
 
 void GameManager::remove_player(int p_id) 

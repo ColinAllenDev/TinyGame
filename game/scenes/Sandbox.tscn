@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://bd0nw8s0qrjwr"]
+[gd_scene load_steps=11 format=3 uid="uid://bd0nw8s0qrjwr"]
 
 [ext_resource type="Material" uid="uid://cy0xxq3gsdkqu" path="res://assets/materials/Sand.tres" id="1_vwa2e"]
 [ext_resource type="PackedScene" uid="uid://cthtl2pimh5hg" path="res://scenes/GameManager.tscn" id="3_fqoli"]
@@ -31,6 +31,12 @@ size = Vector3(40, 1, 20)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1n402"]
 albedo_color = Color(0.788235, 0.788235, 0.788235, 1)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_erjqs"]
+size = Vector3(60, 5, 0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_h7l0b"]
+size = Vector3(0, 5, 20)
+
 [node name="Sandbox" type="Node3D"]
 
 [node name="GameManager" parent="." instance=ExtResource("3_fqoli")]
@@ -61,3 +67,19 @@ transform = Transform3D(40, 0, 0, 0, 1, 0, 0, 0, 20, 0, 0, 0)
 material_override = ExtResource("1_vwa2e")
 mesh = SubResource("BoxMesh_xora3")
 surface_material_override/0 = SubResource("StandardMaterial3D_1n402")
+
+[node name="BoundsX" type="CollisionShape3D" parent="Court"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.48783, -9.98677)
+shape = SubResource("BoxShape3D_erjqs")
+
+[node name="BoundsZ" type="CollisionShape3D" parent="Court"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 3.48783, 0.0132332)
+shape = SubResource("BoxShape3D_h7l0b")
+
+[node name="BoundsZ2" type="CollisionShape3D" parent="Court"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 3.48783, 0.0132332)
+shape = SubResource("BoxShape3D_h7l0b")
+
+[node name="BoundsX2" type="CollisionShape3D" parent="Court"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.48783, 10.0132)
+shape = SubResource("BoxShape3D_erjqs")

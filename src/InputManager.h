@@ -38,7 +38,7 @@ namespace godot
     protected:
         static void _bind_methods();
     public:
-        InputManager();
+        InputManager() {}
         ~InputManager() {}
 
         void _ready();

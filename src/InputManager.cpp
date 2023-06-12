@@ -33,11 +33,6 @@ void InputManager::_bind_methods()
     ADD_SIGNAL(MethodInfo("input_request_player_join", PropertyInfo(Variant::INT, "p_id")));
 }
 
-InputManager::InputManager() 
-{
-
-} 
-
 void InputManager::_ready() 
 {
     /// RUNTIME LOGIC ///

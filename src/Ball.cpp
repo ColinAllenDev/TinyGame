@@ -17,7 +17,9 @@
 using namespace godot;
 
 void Ball::_bind_methods() 
-{
+{        
+    if (Engine::get_singleton()->is_editor_hint()) return;
+
     ClassDB::bind_method(D_METHOD("_on_strike_area_entered", "area"), &Ball::_on_strike_area_entered);
     ClassDB::bind_method(D_METHOD("_on_strike_area_exited", "area"), &Ball::_on_strike_area_exited);
     ClassDB::bind_method(D_METHOD("_on_player_striked", "p_position", "p_direction", "p_force"), &Ball::_on_player_striked);
@@ -63,5 +65,5 @@ void Ball::_on_strike_area_exited(Area3D* area) {
 
 void Ball::_on_player_striked(PlayerController* p_player, Vector3 p_position, Vector3 p_direction, float p_force) 
 {
-    UtilityFunctions::print("Ball Struck by ", p_player->get_player_id(), " with direction ", p_direction);
+    apply_central_impulse(p_direction * p_force);
 }
