@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://dj1braoupdwvx"]
+[gd_scene load_steps=5 format=3 uid="uid://dj1braoupdwvx"]
 
 [ext_resource type="Material" uid="uid://1j6bwidm65wj" path="res://assets/materials/Player.tres" id="1_ylt6d"]
 
@@ -8,15 +8,26 @@ size = Vector3(1, 2, 1)
 [sub_resource type="BoxMesh" id="BoxMesh_8u4mi"]
 size = Vector3(1, 2, 1)
 
+[sub_resource type="SphereShape3D" id="SphereShape3D_q68b0"]
+radius = 1.25
+
 [node name="Player" type="Player"]
 
 [node name="PlayerController" type="PlayerController" parent="."]
 max_acceleration = 90.0
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="PlayerController"]
+[node name="BodyCollider" type="CollisionShape3D" parent="PlayerController"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00146502, 2.98023e-08, 0.00196934)
 shape = SubResource("BoxShape3D_koqa0")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="PlayerController"]
+[node name="Mesh" type="MeshInstance3D" parent="PlayerController"]
 material_override = ExtResource("1_ylt6d")
 mesh = SubResource("BoxMesh_8u4mi")
+
+[node name="StrikeArea" type="Area3D" parent="PlayerController"]
+collision_layer = 2
+collision_mask = 2
+
+[node name="StrikeCollider" type="CollisionShape3D" parent="PlayerController/StrikeArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.732777, 0.792406, 0)
+shape = SubResource("SphereShape3D_q68b0")

@@ -8,18 +8,31 @@ namespace godot
     class Player;
     class Input;
     class InputMap;
+    class Area3D;
+    class Timer;
 
     class PlayerController : public CharacterBody3D
     {
         GDCLASS(PlayerController, CharacterBody3D)
     private:
-        Player* player;
+        // Instances
+        Node* current_scene;
+
+        // Attributes
         int player_id;
+        
+        // Components
+        Player* player_instance;
+        Area3D* strike_area;
 
         // Input
         Input* input;
         InputMap* input_map;
         Vector2 input_direction;
+
+        // Action Handling
+        double strike_rate;
+        bool can_strike;
 
         // Movement/Physics
         double movement_deadzone;
@@ -45,8 +58,11 @@ namespace godot
         void serve();
         void strike();
         
+        // Action timer listeners
+        void _on_can_strike() { can_strike = true; }
 
         // Getters and Setters
+        int get_player_id() const;
         double get_movement_deadzone() const;
         void set_movement_deadzone(const double p_movement_deadzone);
         double get_max_speed() const;

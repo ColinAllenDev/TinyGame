@@ -1,6 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://ckab2r0igxkfs"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_f1d1v"]
+radius = 1.0
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_03t37"]
 radius = 1.5
@@ -16,6 +17,8 @@ radius = 1.5
 height = 3.0
 
 [sub_resource type="SphereMesh" id="SphereMesh_m5b46"]
+radius = 1.0
+height = 2.0
 
 [node name="Ball" type="Ball"]
 
@@ -23,6 +26,8 @@ height = 3.0
 shape = SubResource("SphereShape3D_f1d1v")
 
 [node name="StrikeArea" type="Area3D" parent="."]
+collision_layer = 2
+collision_mask = 2
 
 [node name="StrikeCollider" type="CollisionShape3D" parent="StrikeArea"]
 shape = SubResource("SphereShape3D_03t37")

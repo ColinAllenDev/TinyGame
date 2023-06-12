@@ -8,11 +8,17 @@
 #include <godot_cpp/classes/input_map.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/variant/callable.hpp>
+#include <godot_cpp/classes/scene_tree.hpp>
+#include <godot_cpp/classes/area3d.hpp>
+#include <godot_cpp/classes/scene_tree_timer.hpp>
 
 using namespace godot;
 
 void PlayerController::_bind_methods() 
 {
+    // Attributes
+    ClassDB::bind_method(D_METHOD("get_player_id"), &PlayerController::get_player_id);
+
     // Movement
     ClassDB::bind_method(D_METHOD("get_movement_deadzone"), &PlayerController::get_movement_deadzone);
     ClassDB::bind_method(D_METHOD("set_movement_deadzone", "p_input_deadzone"), &PlayerController::set_movement_deadzone);
@@ -36,6 +42,9 @@ void PlayerController::_bind_methods()
     ClassDB::bind_method(D_METHOD("set_jump_impulse", "p_impulse"), &PlayerController::set_jump_impulse);
     ClassDB::add_property("PlayerController", PropertyInfo(Variant::FLOAT, "jump_impulse"), "set_jump_impulse", "get_jump_impulse");
 
+    // Listeners
+    ClassDB::bind_method(D_METHOD("_on_can_strike"), &PlayerController::_on_can_strike);
+
     // Signals
     ADD_SIGNAL(MethodInfo("player_served", 
         PropertyInfo(Variant::VECTOR3, "player_position"),
@@ -49,6 +58,10 @@ void PlayerController::_bind_methods()
 
 PlayerController::PlayerController() 
 {
+    // Action Defaults
+    strike_rate = 0.24;
+    can_strike = true;
+
     // Movement Defaults
     movement_deadzone = 0.32;
     max_speed = 14.0f;
@@ -61,8 +74,15 @@ void PlayerController::_ready()
 {
     if (Engine::get_singleton()->is_editor_hint()) return;
 
-    player = (Player*)get_parent();
-    player_id = player->get_player_id();
+    // Get scene object and root node
+    current_scene = get_tree()->get_current_scene();
+    player_instance = current_scene->get_node<Player>("Player");
+    Node* controller_instance = player_instance->get_node<PlayerController>("PlayerController");
+
+    // Component and Attribute Initializaton
+    input = Input::get_singleton();
+    strike_area = controller_instance->get_node<Area3D>("StrikeArea");
+    player_id = player_instance->get_player_id();
 }
 
 void PlayerController::_process(double delta) 
@@ -117,15 +137,19 @@ void PlayerController::_physics_process(double delta)
     }
 
     // Strike logic
-    if (input->is_action_pressed("strike_"+String::num(player_id))) {
+    if (input->is_action_pressed("strike_"+String::num(player_id)) && can_strike) {
+        //  Start action timer
+        can_strike = false;
+        get_tree()->create_timer(strike_rate, false)->connect("timeout", Callable(this, "_on_can_strike"));
+
         // Player is serving
-        if (player->get_player_state() == PlayerState::Serving && is_on_floor())     
+        if (player_instance->get_player_state() == PlayerState::Serving && is_on_floor())     
         {
             serve();
         }
 
         // Emit strike signal?
-        if (player->get_player_state() != PlayerState::Serving) 
+        if (player_instance->get_player_state() != PlayerState::Serving) 
         {
             strike();
         }
@@ -141,8 +165,6 @@ void PlayerController::_physics_process(double delta)
 
 void PlayerController::handle_input() 
 {
-    input = Input::get_singleton();
-    
     // Movement
     input_direction.x =
         input->get_action_strength("move_right_"+String::num(player_id)) - input->get_action_strength("move_left_"+String::num(player_id));
@@ -158,7 +180,7 @@ void PlayerController::serve()
     emit_signal("player_served", get_position() + serve_direction + serve_offset, serve_direction); 
 
     // TODO: Add check if player succesfully served
-    player->set_player_state(PlayerState::Moving); 
+    player_instance->set_player_state(PlayerState::Moving); 
 }
 
 void PlayerController::strike() 
@@ -167,10 +189,19 @@ void PlayerController::strike()
     Vector3 strike_direction = Vector3(0.5, 0.5, 0);
     float strike_force = 14.0f;
 
-    emit_signal("player_striked", get_position(), strike_direction, strike_force);
+    // Valid collision area logic performed by collision layers in godot
+    if (strike_area->has_overlapping_areas()) 
+    {
+        emit_signal("player_striked", this, get_position(), strike_direction, strike_force);
+    }
 }
 
 #pragma region Getters-Setters
+int PlayerController::get_player_id() const 
+{
+    return player_id;
+}
+
 double PlayerController::get_movement_deadzone() const 
 {
     return movement_deadzone;
