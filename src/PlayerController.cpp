@@ -11,6 +11,8 @@
 #include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/classes/area3d.hpp>
 #include <godot_cpp/classes/scene_tree_timer.hpp>
+#include <godot_cpp/variant/transform3d.hpp>
+#include <godot_cpp/variant/basis.hpp>
 
 using namespace godot;
 
@@ -46,7 +48,10 @@ void PlayerController::_bind_methods()
     ClassDB::bind_method(D_METHOD("set_jump_impulse", "p_impulse"), &PlayerController::set_jump_impulse);
     ClassDB::add_property("PlayerController", PropertyInfo(Variant::FLOAT, "jump_impulse"), "set_jump_impulse", "get_jump_impulse");
 
+    ClassDB::bind_method(D_METHOD("get_pivot"), &PlayerController::get_pivot);
+
     // Listeners
+    ClassDB::bind_method(D_METHOD("_on_player_state_changed", "p_state"), &PlayerController::_on_player_state_changed);
     ClassDB::bind_method(D_METHOD("_on_can_strike"), &PlayerController::_on_can_strike);
 
     // Signals
@@ -55,9 +60,8 @@ void PlayerController::_bind_methods()
         PropertyInfo(Variant::VECTOR3, "aim_direction")));
 
     ADD_SIGNAL(MethodInfo("player_striked", 
-        PropertyInfo(Variant::VECTOR3, "player_position"),
-        PropertyInfo(Variant::VECTOR3, "aim_direction"),
-        PropertyInfo(Variant::FLOAT, "strike_force")));
+        PropertyInfo(Variant::OBJECT, "pivot"),
+        PropertyInfo(Variant::FLOAT, "p_force")));
 }
 
 PlayerController::PlayerController() 
@@ -65,7 +69,6 @@ PlayerController::PlayerController()
     // Action Defaults
     strike_rate = 0.24;
     strike_force = 8.0;
-    strike_angle = 45.0;
     can_strike = true;
 
     // Movement Defaults
@@ -73,24 +76,34 @@ PlayerController::PlayerController()
     max_speed = 14.0f;
     max_acceleration = 45.0f;
     max_fall_acceleration = 75.0f;
-    jump_impulse = 20.0f;
+    jump_impulse = 30.0f;
+    default_face = 1;
 }
 
 void PlayerController::_ready() 
 {
     if (Engine::get_singleton()->is_editor_hint()) return;
 
-    // Get scene object and root node
-    current_scene = get_tree()->get_current_scene();
+    // Get relevant attributes from parent node
     player_instance = (Player*)get_parent();
-    Node* controller_instance = player_instance->get_node<PlayerController>("PlayerController");
+    player_instance->connect("player_state_changed", Callable(this, "_on_player_state_changed"));
+    player_state = player_instance->get_player_state();
 
     // Component and Attribute Initializaton
+    Node* controller_instance = player_instance->get_node<PlayerController>("PlayerController");
     input = Input::get_singleton();
     strike_area = controller_instance->get_node<Area3D>("StrikeArea");
     player_id = player_instance->get_player_id();
 
+    // TEMPORARY
+    if (player_id == 1) default_face = -1;
+    facing_direction = Vector3(default_face, 0, 0);
 
+    // Pivot
+    pivot = controller_instance->get_node<Node3D>("Pivot");
+    pivot_direction = facing_direction;
+
+    look_at(get_global_position() + facing_direction);
 }
 
 void PlayerController::_process(double delta) 
@@ -103,25 +116,58 @@ void PlayerController::_process(double delta)
 
 void PlayerController::_physics_process(double delta) 
 {
-    // NOTE: Might need to move input logic to the main _process method as input might be missed
-    // during physics update.
-
     // Disables component logic outside gameplay
     if (Engine::get_singleton()->is_editor_hint()) return;
 
+    // Handle movmenet, aiming, and actions
+    if(player_state == PlayerState::Moving) 
+    {
+        handle_movement(delta);
+    }
+
+    handle_aiming();
+    handle_actions();
+
+    // Look towards facing direction
+    if (has_input) {
+        facing_direction = Vector3(input_direction.x, 0, input_direction.y);
+    }
+    look_at(get_global_position() + facing_direction);
+
+    // Set velocity on y axis
+    current_velocity.y = target_velocity.y;
+
+    set_velocity(current_velocity);
+    move_and_slide();
+}
+
+void PlayerController::handle_input() 
+{
+    // Vectors
+    input_direction.x =
+        input->get_action_strength("move_right_"+String::num(player_id)) - input->get_action_strength("move_left_"+String::num(player_id));
+    input_direction.y =
+        input->get_action_strength("move_down_"+String::num(player_id)) - input->get_action_strength("move_up_"+String::num(player_id));
+
+    // Conditionals
+    has_input = (input_direction.length() > 0);
+    has_movement_input = (input_direction.length() > movement_deadzone*sqrt(2.0f));
+    has_strike_input = input->is_action_pressed("strike_"+String::num(player_id));
+    has_jump_input = input->is_action_pressed("jump_"+String::num(player_id));
+}
+
+void PlayerController::handle_movement(double delta) 
+{
     // Handle movement direction based on input
-    if (input_direction.length() > movement_deadzone*sqrt(2.0f)) 
+    if (has_movement_input) 
     {
         movement_direction = Vector3(input_direction.x, 0.0f, input_direction.y).normalized();
-
-
-        look_at(get_position() + movement_direction);
     } else {
         movement_direction = Vector3(0.0f, 0.0f, 0.0f); 
     }
 
     // Update our target velocity based on movement direction and speed
-    Vector3 target_velocity = Vector3(movement_direction.x, 0.0f, movement_direction.z) * max_speed;
+    target_velocity = Vector3(movement_direction.x, 0.0f, movement_direction.z) * max_speed;
 
     float max_speed_delta = max_acceleration * (float)delta;
 
@@ -135,59 +181,60 @@ void PlayerController::_physics_process(double delta)
             max_speed_delta ? target_velocity.z : current_velocity.z + 
                 SIGN(target_velocity.z - current_velocity.z) * max_speed_delta;
 
-    // Player is falling
+    // Update movement based on velocity
     if (!is_on_floor()) 
     {
         target_velocity.y = current_velocity.y - (max_fall_acceleration * (float)delta);
     }
-    
-    // Player is on the floor and pressing "jump" input
-    if (is_on_floor() && input->is_action_pressed("jump_"+String::num(player_id))) 
+}
+
+void PlayerController::handle_aiming() 
+{
+    // Handle pivot direction
+    if (has_input) 
+    {        
+        // TODO: Handle facing opposite direction of the ball
+        pivot_direction = Vector3(input_direction.x, 0.0f, input_direction.y);
+        pivot_direction = pivot_direction.clamp(Vector3(default_face, 0, -1), Vector3(default_face, 0, 1));
+
+    } else {
+        pivot_direction = Vector3(0, 1, 0);
+    }
+}
+
+void PlayerController::handle_actions() 
+{
+    // Jump logic
+    if (has_jump_input && is_on_floor() && player_state != PlayerState::Serving) 
     {
         target_velocity.y = jump_impulse;
     }
 
     // Strike logic
-    if (input->is_action_pressed("strike_"+String::num(player_id)) && can_strike) {
+    if (has_strike_input && can_strike)  {
         //  Start action timer
         can_strike = false;
         get_tree()->create_timer(strike_rate, false)->connect("timeout", Callable(this, "_on_can_strike"));
 
         // Player is serving
-        if (player_instance->get_player_state() == PlayerState::Serving && is_on_floor())     
+        if (player_state == PlayerState::Serving && is_on_floor())     
         {
             serve();
         }
 
         // Emit strike signal?
-        if (player_instance->get_player_state() != PlayerState::Serving) 
+        if (player_state != PlayerState::Serving) 
         {
             strike();
         }
     }
-
-    // Set velocity on y axis
-    current_velocity.y = target_velocity.y;
-
-    // Update movement based on velocity
-    set_velocity(current_velocity);
-    move_and_slide();
-}
-
-void PlayerController::handle_input() 
-{
-    // Movement
-    input_direction.x =
-        input->get_action_strength("move_right_"+String::num(player_id)) - input->get_action_strength("move_left_"+String::num(player_id));
-    input_direction.y =
-        input->get_action_strength("move_down_"+String::num(player_id)) - input->get_action_strength("move_up_"+String::num(player_id));
 }
 
 void PlayerController::serve() 
 {
     // 1. Instantiate Ball in the air
-    Vector3 serve_direction = Vector3(0, 1, 0);
-    Vector3 serve_offset = Vector3(1.5f, 0, 0);
+    Vector3 serve_direction = pivot_direction;
+    Vector3 serve_offset = Vector3(1, 0, 0);
     emit_signal("player_served", get_position() + serve_direction + serve_offset, serve_direction); 
 
     // TODO: Add check if player succesfully served
@@ -196,18 +243,9 @@ void PlayerController::serve()
 
 void PlayerController::strike() 
 {
-    // TODO: Handle strike direction stuff
-    strike_direction = Vector3(1, 0, 0);
-    strike_force = 12.0f;
-    strike_angle = Math::deg_to_rad(70.0); 
-    strike_direction.rotate(Vector3(0, 0, 1), strike_angle);
-    strike_direction.normalize();
-    
-    UtilityFunctions::print("Strike Vector: ", strike_direction);
-
     // Valid collision area logic performed by collision layers in godot
     if (strike_area->has_overlapping_areas()) 
     {
-        emit_signal("player_striked", this, get_position(), strike_direction, strike_force);
+        emit_signal("player_striked", pivot, strike_force);
     }
-}Vector3 strike_direction;
+}

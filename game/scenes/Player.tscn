@@ -1,6 +1,11 @@
-[gd_scene load_steps=7 format=3 uid="uid://dj1braoupdwvx"]
+[gd_scene load_steps=8 format=3 uid="uid://dj1braoupdwvx"]
 
 [ext_resource type="Material" uid="uid://1j6bwidm65wj" path="res://assets/materials/Player.tres" id="1_ylt6d"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_jpav2"]
+top_radius = 0.0
+bottom_radius = 0.25
+height = 1.5
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_koqa0"]
 size = Vector3(1, 2, 1)
@@ -24,6 +29,14 @@ height = 2.5
 [node name="Player" type="Player"]
 
 [node name="PlayerController" type="PlayerController" parent="."]
+strike_force = 14.0
+
+[node name="Pivot" type="Node3D" parent="PlayerController"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="PlayerController/Pivot"]
+transform = Transform3D(0.999999, 0, 0, 0, -4.37113e-08, 1, 0, -0.999999, -4.37114e-08, 0, 0.65, -1)
+visible = false
+mesh = SubResource("CylinderMesh_jpav2")
 
 [node name="BodyCollider" type="CollisionShape3D" parent="PlayerController"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00146502, 2.98023e-08, 0.00196934)
@@ -38,9 +51,10 @@ collision_layer = 2
 collision_mask = 2
 
 [node name="StrikeCollider" type="CollisionShape3D" parent="PlayerController/StrikeArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.22348, -0.75)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -1)
 shape = SubResource("SphereShape3D_q68b0")
 
 [node name="AreaMesh" type="MeshInstance3D" parent="PlayerController/StrikeArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.22348, -0.75)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -1)
+visible = false
 mesh = SubResource("SphereMesh_q4eqv")

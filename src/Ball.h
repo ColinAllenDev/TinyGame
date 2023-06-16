@@ -15,6 +15,10 @@ namespace godot
     {
         GDCLASS(Ball, RigidBody3D)
     private:
+        // Attributes
+        double serve_force;
+
+        // Components
         RigidBody3D* body;
         Area3D* strike_area;
         CollisionShape3D* body_collider;
@@ -22,14 +26,18 @@ namespace godot
     protected:
         static void _bind_methods();
     public:
-        Ball() {}
+        Ball();
         ~Ball() {}
 
         void _ready();
-        
+
+        void serve(Vector3 p_position);
+
         void _on_strike_area_entered(Area3D* area);
         void _on_strike_area_exited(Area3D* area);
-        void _on_player_striked(PlayerController* p_player, Vector3 p_position, Vector3 p_direction, float p_force);
+        void _on_player_striked(Node3D* pivot, float p_force);
+        double get_serve_force() const { return serve_force; }
+        void set_serve_force(double p_force) { serve_force = p_force; }
     };
 }
 

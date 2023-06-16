@@ -22,14 +22,24 @@ void Ball::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("_on_strike_area_entered", "area"), &Ball::_on_strike_area_entered);
     ClassDB::bind_method(D_METHOD("_on_strike_area_exited", "area"), &Ball::_on_strike_area_exited);
-    ClassDB::bind_method(D_METHOD("_on_player_striked", "p_position", "p_direction", "p_force"), &Ball::_on_player_striked);
+    ClassDB::bind_method(D_METHOD("_on_player_striked", "p_pivot", "p_force"), &Ball::_on_player_striked);
+
+    ClassDB::bind_method(D_METHOD("get_serve_force"), &Ball::get_serve_force);
+    ClassDB::bind_method(D_METHOD("set_serve_force", "p_force"), &Ball::set_serve_force);
+    ClassDB::add_property("Ball", PropertyInfo(Variant::FLOAT, "serve_force"), "set_serve_force", "get_serve_force");
+
 }
 
-void Ball::_ready() 
+Ball::Ball() 
+{
+    serve_force = 20.0;
+}
+
+void Ball::_ready()
 {   
     // Disables logic below inside editor
     if (Engine::get_singleton()->is_editor_hint()) return;
-    
+
     // Get scene object and root node
     Node* current_scene = get_tree()->get_current_scene();
     Node* root_instance = current_scene->get_node<Ball>("Ball");
@@ -43,6 +53,15 @@ void Ball::_ready()
     // Connect signals
     strike_area->connect("area_entered", Callable(this, "_on_strike_area_entered"));
     strike_area->connect("area_exited", Callable(this, "_on_strike_area_exited"));
+}
+
+void Ball::serve(Vector3 p_position) 
+{
+    // Temporary logic
+    set_gravity_scale(3);
+
+    set_angular_velocity(Vector3(0.1, 0, 0));
+    apply_central_impulse(Vector3(0, 1, 0) * serve_force);
 }
 
 void Ball::_on_strike_area_entered(Area3D* area) {    
@@ -63,7 +82,10 @@ void Ball::_on_strike_area_exited(Area3D* area) {
     }
 }
 
-void Ball::_on_player_striked(PlayerController* p_player, Vector3 p_position, Vector3 p_direction, float p_force) 
+void Ball::_on_player_striked(Node3D* p_pivot, float p_force) 
 {
-    apply_central_impulse(p_direction * p_force);
+    Vector3 pivot_direction = (get_global_position() - p_pivot->get_global_position()).normalized();
+    Vector3 strike_direction = Vector3(pivot_direction.x, 0, 0);
+
+    set_linear_velocity(strike_direction * p_force);
 }

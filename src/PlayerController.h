@@ -9,42 +9,50 @@ namespace godot
     class Input;
     class InputMap;
     class Area3D;
-    class Timer;
+    class Ball;
 
     class PlayerController : public CharacterBody3D
     {
         GDCLASS(PlayerController, CharacterBody3D)
     private:
         // Instances
-        Node* current_scene;
+        Player* player_instance;
 
         // Attributes
         int player_id;
+        int player_state;
         double strike_rate;
         double strike_force;
-        double strike_angle;
         
         // Components
-        Player* player_instance;
         Area3D* strike_area;
+        Node3D* pivot;
 
         // Input
         Input* input;
         InputMap* input_map;
         Vector2 input_direction;
 
-        // Action Handling
+        // Conditionals
         bool can_strike;
-
+        bool can_move;
+        bool has_input;
+        bool has_movement_input;
+        bool has_strike_input;
+        bool has_jump_input;
+        
         // Movement/Physics
         double movement_deadzone;
         double max_speed;
         double max_acceleration;
         double max_fall_acceleration;
         double jump_impulse;
-        Vector3 look_direction;
+        int default_face;
+        Vector3 facing_direction;
+        Vector3 pivot_direction;
         Vector3 movement_direction;
         Vector3 current_velocity;
+        Vector3 target_velocity;
     protected:
         static void _bind_methods();
     public:
@@ -56,11 +64,15 @@ namespace godot
         void _physics_process(double delta);
         
         void handle_input();
-
+        void handle_movement(double delta);
+        void handle_aiming();
+        void handle_actions();
+    
         void serve();
         void strike();
-        
+
         // Action timer listeners
+        void _on_player_state_changed(int p_state) { player_state = p_state; }
         void _on_can_strike() { can_strike = true; }
 
         // Getters and Setters
@@ -77,6 +89,7 @@ namespace godot
         void set_max_fall_acceleration(const double p_acceleration) { max_fall_acceleration = p_acceleration; }
         double get_jump_impulse() const { return jump_impulse; }
         void set_jump_impulse(const double p_impulse) { jump_impulse = p_impulse; }
+        Node3D* get_pivot() const { return pivot; }
     };  
 }
 

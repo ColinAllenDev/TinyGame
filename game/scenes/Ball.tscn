@@ -1,4 +1,6 @@
-[gd_scene load_steps=6 format=3 uid="uid://ckab2r0igxkfs"]
+[gd_scene load_steps=7 format=3 uid="uid://ckab2r0igxkfs"]
+
+[ext_resource type="Material" uid="uid://6wq5b2lvdam1" path="res://assets/materials/Ball.tres" id="1_1g1ph"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_f1d1v"]
 radius = 1.0
@@ -21,7 +23,8 @@ radius = 1.0
 height = 2.0
 
 [node name="Ball" type="Ball"]
-mass = 0.65
+mass = 2.0
+gravity_scale = 3.0
 
 [node name="BodyCollider" type="CollisionShape3D" parent="."]
 shape = SubResource("SphereShape3D_f1d1v")
@@ -34,8 +37,10 @@ collision_mask = 2
 shape = SubResource("SphereShape3D_03t37")
 
 [node name="AreaMesh" type="MeshInstance3D" parent="StrikeArea"]
+visible = false
 mesh = SubResource("SphereMesh_74y1h")
 skeleton = NodePath("../..")
 
 [node name="BodyMesh" type="MeshInstance3D" parent="."]
+material_override = ExtResource("1_1g1ph")
 mesh = SubResource("SphereMesh_m5b46")

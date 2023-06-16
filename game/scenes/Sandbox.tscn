@@ -1,7 +1,42 @@
-[gd_scene load_steps=11 format=3 uid="uid://bd0nw8s0qrjwr"]
+[gd_scene load_steps=14 format=3 uid="uid://bd0nw8s0qrjwr"]
 
-[ext_resource type="Material" uid="uid://cy0xxq3gsdkqu" path="res://assets/materials/Sand.tres" id="1_vwa2e"]
+[ext_resource type="PackedScene" uid="uid://bunya7sdm1x1q" path="res://scenes/Spawns.tscn" id="2_w7s5p"]
+[ext_resource type="Shader" path="res://shaders/water.gdshader" id="3_7skgi"]
 [ext_resource type="PackedScene" uid="uid://cthtl2pimh5hg" path="res://scenes/GameManager.tscn" id="3_fqoli"]
+[ext_resource type="Texture2D" uid="uid://h1fgk8q07ohd" path="res://assets/textures/Water/WaterDistortion.png" id="3_radrm"]
+[ext_resource type="Texture2D" uid="uid://26ysom5ostho" path="res://assets/textures/Water/PerlinNoise.png" id="4_j5ubr"]
+[ext_resource type="PackedScene" uid="uid://bhnqm4wusmnes" path="res://scenes/Beach.tscn" id="5_s3hhm"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_5dkkb"]
+size = Vector3(48, 1, 23)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_o3ws7"]
+size = Vector3(0.0249827, 4, 24)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_opp8g"]
+render_priority = 0
+shader = ExtResource("3_7skgi")
+shader_parameter/beer_factor = 0.8
+shader_parameter/foam_distance = 0.01
+shader_parameter/foam_max_distance = 0.4
+shader_parameter/foam_min_distance = 0.04
+shader_parameter/foam_color = Color(1, 1, 1, 1)
+shader_parameter/surface_noise_tiling = Vector2(1, 4)
+shader_parameter/surface_noise_scroll = Vector3(0.03, 0.03, 0)
+shader_parameter/surface_noise_cutoff = 0.777
+shader_parameter/surface_distortion_amount = 0.27
+shader_parameter/_DepthGradientShallow = Color(0.325, 0.807, 0.971, 0.725)
+shader_parameter/_DepthGradientDeep = Color(0.086, 0.407, 1, 0.749)
+shader_parameter/_DepthMaxDistance = 1.0
+shader_parameter/_DepthFactor = 1.0
+shader_parameter/surfaceNoise = ExtResource("4_j5ubr")
+shader_parameter/distortNoise = ExtResource("3_radrm")
+
+[sub_resource type="QuadMesh" id="QuadMesh_wm0q8"]
+material = SubResource("ShaderMaterial_opp8g")
+size = Vector2(150, 150)
+subdivide_width = 32
+subdivide_depth = 32
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_ftctr"]
 sky_top_color = Color(0.278431, 0.592157, 0.929412, 1)
@@ -19,23 +54,9 @@ sky = SubResource("Sky_btov8")
 ambient_light_source = 3
 ambient_light_color = Color(0.501961, 0.501961, 0.501961, 1)
 ambient_light_sky_contribution = 0.25
-ambient_light_energy = 3.5
+ambient_light_energy = 2.43
 tonemap_mode = 2
 tonemap_white = 1.55
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_60ykr"]
-size = Vector3(40, 1, 20)
-
-[sub_resource type="BoxMesh" id="BoxMesh_xora3"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1n402"]
-albedo_color = Color(0.788235, 0.788235, 0.788235, 1)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_erjqs"]
-size = Vector3(60, 5, 0)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_h7l0b"]
-size = Vector3(0, 5, 20)
 
 [node name="Sandbox" type="Node3D"]
 
@@ -43,43 +64,33 @@ size = Vector3(0, 5, 20)
 
 [node name="InputManager" type="InputManager" parent="."]
 
+[node name="Spawns" parent="." instance=ExtResource("2_w7s5p")]
+
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.759237, 0.650814, 0, -0.650814, 0.759237, 0, 15, 19)
+transform = Transform3D(1, 0, 0, 0, 0.834329, 0.551267, 0, -0.551267, 0.834329, -0.258227, 12.0956, 21.8415)
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_cjral")
+[node name="Environment" type="StaticBody3D" parent="."]
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(-0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, 0.5, -0.5, 0, 10, 0)
+[node name="Beach_Stage" parent="Environment" instance=ExtResource("5_s3hhm")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 5)
+
+[node name="Floor_Collider" type="CollisionShape3D" parent="Environment"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_5dkkb")
+
+[node name="Net_Collider" type="CollisionShape3D" parent="Environment"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0012517, 1.00866, -5.92623)
+shape = SubResource("BoxShape3D_o3ws7")
+
+[node name="Water" type="MeshInstance3D" parent="Environment"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -0.0888929, -0.585836, -0.085113)
+mesh = SubResource("QuadMesh_wm0q8")
+skeleton = NodePath("../..")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Environment"]
+transform = Transform3D(-0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, 0.5, -0.5, -0.0150781, 10.0355, -0.0146008)
 light_color = Color(0.972549, 0.913725, 0.768627, 1)
-shadow_enabled = true
 directional_shadow_fade_start = 0.594
 
-[node name="Court" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.11331, -9.53674e-07, -0.0651512)
-
-[node name="Collider" type="CollisionShape3D" parent="Court"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0451641, -0.0334234, 0.0791721)
-shape = SubResource("BoxShape3D_60ykr")
-
-[node name="Mesh" type="MeshInstance3D" parent="Court"]
-transform = Transform3D(40, 0, 0, 0, 1, 0, 0, 0, 20, 0, 0, 0)
-material_override = ExtResource("1_vwa2e")
-mesh = SubResource("BoxMesh_xora3")
-surface_material_override/0 = SubResource("StandardMaterial3D_1n402")
-
-[node name="BoundsX" type="CollisionShape3D" parent="Court"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.48783, -9.98677)
-shape = SubResource("BoxShape3D_erjqs")
-
-[node name="BoundsZ" type="CollisionShape3D" parent="Court"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 3.48783, 0.0132332)
-shape = SubResource("BoxShape3D_h7l0b")
-
-[node name="BoundsZ2" type="CollisionShape3D" parent="Court"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 3.48783, 0.0132332)
-shape = SubResource("BoxShape3D_h7l0b")
-
-[node name="BoundsX2" type="CollisionShape3D" parent="Court"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.48783, 10.0132)
-shape = SubResource("BoxShape3D_erjqs")
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Environment"]
+environment = SubResource("Environment_cjral")

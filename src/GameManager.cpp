@@ -30,21 +30,34 @@ void GameManager::_ready()
 {
     if (Engine::get_singleton()->is_editor_hint()) return;
 
-    // Set main game scene
-    game_scene = get_tree()->get_current_scene();
+    // Singletons
+    resource_loader = ResourceLoader::get_singleton();
 
     // Get scene components
+    game_scene = get_tree()->get_current_scene();
     input_manager = game_scene->get_node<InputManager>("InputManager");
-    resource_loader = ResourceLoader::get_singleton();
 
     // Start game by awaiting players
     game_state = GameState::AwaitPlayers;
+
+    // Initialize spawn points
+    init_spawns();
 
     // Add initital player to scene (TODO: make dynamic)
     add_player(0);
 
     // Connect listener to input signal
     input_manager->connect("input_request_player_join", Callable(this, "_on_input_request_player_join"));
+}
+
+void GameManager::init_spawns() 
+{
+    Node* spawns_node = game_scene->get_node<Node>("Spawns");
+    for (int i = 0; i < spawns_node->get_child_count(); i++) 
+    {
+        Node3D* spawn = (Node3D*)spawns_node->get_child(i); 
+        spawns.insert(i, spawn);
+    }
 }
 
 void GameManager::add_player(int p_id) 
@@ -61,6 +74,7 @@ void GameManager::add_player(int p_id)
     players.insert(p_id, player_class);
 
     PlayerController* player_controller = (PlayerController*)player_node->get_child(0);
+    player_controller->set_global_position(spawns[p_id]->get_global_position());
     player_controller->connect("player_served", Callable(this, "_on_player_served"));
 
     UtilityFunctions::print("Added Player: ", player_class->get_player_id());
@@ -90,14 +104,12 @@ void GameManager::_on_player_served(Vector3 p_position, Vector3 p_direction)
 {
     Ref<PackedScene> ball_scene = resource_loader->load("res://scenes/Ball.tscn");
     Node* ball_node = ball_scene->instantiate();
+    Ball* ball_class = (Ball*)ball_node;
     game_scene->call_deferred("add_child", ball_node);
 
     Node3D* ball_node_3d = (Node3D*)ball_node;
     ball_node_3d->set_position(p_position + p_direction);
-
-    // Temporary Code
-    RigidBody3D* ball_rbody_3d = (RigidBody3D*)ball_node;
-    ball_rbody_3d->apply_impulse(p_direction * 10.0f, p_position);
+    ball_class->serve(p_position);
 }
 
 GameState GameManager::get_game_state() const 

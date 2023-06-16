@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://bunya7sdm1x1q"]
+
+[node name="Spawns" type="Node"]
+
+[node name="Spawn_L_1" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1, 1)
+
+[node name="Spawn_L_2" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 1, -7)
+
+[node name="Spawn_R_1" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1, 1)
+
+[node name="Spawn_R_2" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 1, -7)

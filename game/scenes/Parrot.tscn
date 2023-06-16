@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://bfwm7obg06tjb"]
+[gd_scene load_steps=2 format=3]
 
-[ext_resource type="PackedScene" uid="uid://wi0tf128ywki" path="res://assets/models/Parrot.glb" id="1_xwpm1"]
+[ext_resource type="PackedScene" uid="uid://wi0tf128ywki" path="res://assets/models/Parrot/Parrot.glb" id="1_xwpm1"]
 
 [node name="Parrot" instance=ExtResource("1_xwpm1")]
 

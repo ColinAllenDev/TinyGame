@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://bhnqm4wusmnes"]
+
+[ext_resource type="PackedScene" uid="uid://xmkquxb75l0" path="res://assets/models/Beach/Beach_Stage.glb" id="1_43r6v"]
+
+[node name="Beach_Stage" instance=ExtResource("1_43r6v")]
+
+[node name="Net" parent="." index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0155144, 1, 4.93185)

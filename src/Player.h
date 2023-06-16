@@ -7,7 +7,7 @@ namespace godot
 {
     class PlayerController;
 
-    enum PlayerState {Serving, Moving, Idle};
+    enum PlayerState {Serving, Moving};
 
     class Player : public Node3D 
     {
@@ -16,7 +16,7 @@ namespace godot
         PlayerState player_state;
         int player_id;
         int device_id;
-
+        int team;
         int score;
     protected:
         static void _bind_methods();
