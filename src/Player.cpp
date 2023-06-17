@@ -17,56 +17,17 @@ void Player::_bind_methods()
     ADD_SIGNAL(MethodInfo("player_state_changed", PropertyInfo(Variant::INT, "p_state")));
 }
 
-Player::Player() 
-{
-    score = 0;
-    player_state = PlayerState::Moving;
-}
-
 void Player::_ready() 
 {
     if (Engine::get_singleton()->is_editor_hint()) return;
 
-    UtilityFunctions::print("Player ", player_id, " joined the game!");
-}
+    score = 0;
 
-PlayerState Player::get_player_state() const 
-{
-    return player_state;
+    UtilityFunctions::print("Player ", player_id, " joined the game!");
 }
 
 void Player::set_player_state(PlayerState p_state) 
 {
     player_state = p_state;
     emit_signal("player_state_changed", (int)p_state);
-}
-
-int Player::get_player_id() const 
-{
-    return player_id;
-}
-
-void Player::set_player_id(const int p_id) 
-{
-    player_id = p_id;
-}
-
-int Player::get_device_id() const 
-{
-    return device_id;
-}
-
-void Player::set_device_id(const int p_device_id) 
-{
-    device_id = p_device_id;
-}
-
-int Player::get_player_score() const 
-{
-    return score;
-}
-
-void Player::set_player_score(const int p_score) 
-{
-    score = p_score;
 }

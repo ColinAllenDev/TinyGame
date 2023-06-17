@@ -14,7 +14,7 @@ size = Vector3(1, 2, 1)
 size = Vector3(1, 2, 1)
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_q68b0"]
-radius = 1.25
+radius = 1.5
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_h5yr6"]
 transparency = 1
@@ -29,7 +29,7 @@ height = 2.5
 [node name="Player" type="Player"]
 
 [node name="PlayerController" type="PlayerController" parent="."]
-strike_force = 14.0
+strike_force = 50.0
 
 [node name="Pivot" type="Node3D" parent="PlayerController"]
 
@@ -51,7 +51,7 @@ collision_layer = 2
 collision_mask = 2
 
 [node name="StrikeCollider" type="CollisionShape3D" parent="PlayerController/StrikeArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.43611, -1)
 shape = SubResource("SphereShape3D_q68b0")
 
 [node name="AreaMesh" type="MeshInstance3D" parent="PlayerController/StrikeArea"]

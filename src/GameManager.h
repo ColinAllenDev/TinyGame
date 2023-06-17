@@ -19,6 +19,7 @@ namespace godot
     private:
         Node* game_scene;
         GameState game_state;
+        HashMap<int, int> scores;
         HashMap<int, Player*> players;
         HashMap<int, Node3D*> spawns;
         InputManager* input_manager;
@@ -33,7 +34,7 @@ namespace godot
         void _process_physics(double delta);
 
         void init_spawns();
-        void add_player(int p_id);
+        void add_player();
         void remove_player(int p_id);      
 
         // Listeners
@@ -42,6 +43,7 @@ namespace godot
 
         // Getters and Setters
         GameState get_game_state() const;
+        int get_team_score(int p_team) const;
     };
 }
 

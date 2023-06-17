@@ -84,8 +84,14 @@ void Ball::_on_strike_area_exited(Area3D* area) {
 
 void Ball::_on_player_striked(Node3D* p_pivot, float p_force) 
 {
+    float strike_force = 20;
+    float gravity_scale = 8;
     Vector3 pivot_direction = (get_global_position() - p_pivot->get_global_position()).normalized();
     Vector3 strike_direction = Vector3(pivot_direction.x, 0, 0);
 
-    set_linear_velocity(strike_direction * p_force);
+    UtilityFunctions::print("Pivot Direction: ", pivot_direction, " Strike_Direction: ", strike_direction);
+
+    set_gravity_scale(gravity_scale);
+    set_lock_rotation_enabled(true);
+    apply_central_impulse(strike_direction * strike_force);
 }

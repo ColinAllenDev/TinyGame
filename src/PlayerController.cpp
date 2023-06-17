@@ -67,8 +67,8 @@ void PlayerController::_bind_methods()
 PlayerController::PlayerController() 
 {
     // Action Defaults
-    strike_rate = 0.24;
-    strike_force = 8.0;
+    strike_rate = 1;
+    strike_force = 20.0;
     can_strike = true;
 
     // Movement Defaults
@@ -82,6 +82,7 @@ PlayerController::PlayerController()
 
 void PlayerController::_ready() 
 {
+    // Disables component logic outside gameplay
     if (Engine::get_singleton()->is_editor_hint()) return;
 
     // Get relevant attributes from parent node
@@ -108,7 +109,6 @@ void PlayerController::_ready()
 
 void PlayerController::_process(double delta) 
 {
-    // Disables component logic outside gameplay
     if (Engine::get_singleton()->is_editor_hint()) return;
 
     handle_input();
@@ -116,7 +116,6 @@ void PlayerController::_process(double delta)
 
 void PlayerController::_physics_process(double delta) 
 {
-    // Disables component logic outside gameplay
     if (Engine::get_singleton()->is_editor_hint()) return;
 
     // Handle movmenet, aiming, and actions

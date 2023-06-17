@@ -40,11 +40,15 @@ void GameManager::_ready()
     // Start game by awaiting players
     game_state = GameState::AwaitPlayers;
 
+    // Initialize scores
+    scores.insert(0, 0);
+    scores.insert(1, 0);
+
     // Initialize spawn points
     init_spawns();
 
     // Add initital player to scene (TODO: make dynamic)
-    add_player(0);
+    add_player();
 
     // Connect listener to input signal
     input_manager->connect("input_request_player_join", Callable(this, "_on_input_request_player_join"));
@@ -60,30 +64,30 @@ void GameManager::init_spawns()
     }
 }
 
-void GameManager::add_player(int p_id) 
+void GameManager::add_player() 
 {
     // Code below this statement only valid during runtime
     if (Engine::get_singleton()->is_editor_hint()) return;
+
+    int player_id = players.size();
 
     Ref<PackedScene> player_scene = resource_loader->load("res://scenes/Player.tscn");
     Node* player_node = player_scene->instantiate();
     get_tree()->get_current_scene()->call_deferred("add_child", player_node);
 
     Player* player_class = (Player*)player_node;
-    player_class->set_player_id(p_id);
-    players.insert(p_id, player_class);
+    player_class->set_player_id(player_id);
+    players.insert(player_id, player_class);
+
+    int team = (player_id % 2) == 0 ? 0 : 1;
+    player_class->set_player_team(team);
+    player_class->set_player_score(0);
 
     PlayerController* player_controller = (PlayerController*)player_node->get_child(0);
-    player_controller->set_global_position(spawns[p_id]->get_global_position());
+    player_controller->set_global_position(spawns[player_id]->get_global_position());
     player_controller->connect("player_served", Callable(this, "_on_player_served"));
 
-    UtilityFunctions::print("Added Player: ", player_class->get_player_id());
-
-    // Temporary testing logic
-    if (p_id == 0) {
-        player_class->set_player_score(10);
-        player_class->set_player_state(PlayerState::Serving);
-    }
+    UtilityFunctions::print("Player: ", player_class->get_player_id(), " joined on Team ", player_class->get_player_team());
 }
 
 void GameManager::remove_player(int p_id) 
@@ -94,7 +98,7 @@ void GameManager::_on_input_request_player_join(int p_id)
 {
     if (!players.has(p_id)) 
     {
-        add_player(p_id);
+        add_player();
     } else {
         UtilityFunctions::print("Player ", p_id ," already exists");
     }
@@ -115,4 +119,9 @@ void GameManager::_on_player_served(Vector3 p_position, Vector3 p_direction)
 GameState GameManager::get_game_state() const 
 {
     return game_state; 
+}
+
+int GameManager::get_team_score(int p_team) const 
+{
+    return scores.get(p_team);
 }
