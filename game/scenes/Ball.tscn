@@ -1,15 +1,12 @@
-[gd_scene load_steps=8 format=3 uid="uid://ckab2r0igxkfs"]
+[gd_scene load_steps=9 format=3 uid="uid://ckab2r0igxkfs"]
 
 [ext_resource type="Material" uid="uid://6wq5b2lvdam1" path="res://assets/materials/Ball.tres" id="1_1g1ph"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ry5i2"]
 bounce = 0.75
 
-[sub_resource type="SphereShape3D" id="SphereShape3D_f1d1v"]
-radius = 1.0
-
 [sub_resource type="SphereShape3D" id="SphereShape3D_03t37"]
-radius = 4.0
+radius = 2.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4jyph"]
 transparency = 1
@@ -18,18 +15,23 @@ albedo_color = Color(0.596078, 0, 0.74902, 0.47451)
 
 [sub_resource type="SphereMesh" id="SphereMesh_74y1h"]
 material = SubResource("StandardMaterial3D_4jyph")
-radius = 1.5
-height = 3.0
+radius = 2.0
+height = 4.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_nfhdk"]
+radius = 1.05
 
 [sub_resource type="SphereMesh" id="SphereMesh_m5b46"]
 radius = 1.0
 height = 2.0
 
-[node name="Ball" type="Ball"]
-physics_material_override = SubResource("PhysicsMaterial_ry5i2")
+[sub_resource type="SphereShape3D" id="SphereShape3D_f1d1v"]
+radius = 1.0
 
-[node name="BodyCollider" type="CollisionShape3D" parent="."]
-shape = SubResource("SphereShape3D_f1d1v")
+[node name="Ball" type="Ball"]
+collision_layer = 4
+collision_mask = 4
+physics_material_override = SubResource("PhysicsMaterial_ry5i2")
 
 [node name="StrikeArea" type="Area3D" parent="."]
 collision_layer = 2
@@ -39,10 +41,19 @@ collision_mask = 2
 shape = SubResource("SphereShape3D_03t37")
 
 [node name="AreaMesh" type="MeshInstance3D" parent="StrikeArea"]
-visible = false
 mesh = SubResource("SphereMesh_74y1h")
 skeleton = NodePath("../..")
+
+[node name="DetectArea" type="Area3D" parent="."]
+collision_layer = 4
+collision_mask = 4
+
+[node name="DetectCollider" type="CollisionShape3D" parent="DetectArea"]
+shape = SubResource("SphereShape3D_nfhdk")
 
 [node name="BodyMesh" type="MeshInstance3D" parent="."]
 material_override = ExtResource("1_1g1ph")
 mesh = SubResource("SphereMesh_m5b46")
+
+[node name="BodyCollider" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_f1d1v")

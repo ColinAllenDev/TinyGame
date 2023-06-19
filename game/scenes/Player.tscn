@@ -23,13 +23,12 @@ albedo_color = Color(1, 0.509804, 0.509804, 1)
 
 [sub_resource type="SphereMesh" id="SphereMesh_q4eqv"]
 material = SubResource("StandardMaterial3D_h5yr6")
-radius = 1.25
-height = 2.5
+radius = 1.5
+height = 3.0
 
 [node name="Player" type="Player"]
 
 [node name="PlayerController" type="PlayerController" parent="."]
-strike_force = 50.0
 
 [node name="Pivot" type="Node3D" parent="PlayerController"]
 
@@ -51,10 +50,9 @@ collision_layer = 2
 collision_mask = 2
 
 [node name="StrikeCollider" type="CollisionShape3D" parent="PlayerController/StrikeArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.43611, -1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, -1)
 shape = SubResource("SphereShape3D_q68b0")
 
 [node name="AreaMesh" type="MeshInstance3D" parent="PlayerController/StrikeArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -1)
-visible = false
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, -1)
 mesh = SubResource("SphereMesh_q4eqv")

@@ -10,6 +10,7 @@ namespace godot
     class CollisionShape3D;
     class PlayerController;
     class Vector3;
+    class Player;
 
     class Ball : public RigidBody3D 
     {
@@ -21,8 +22,12 @@ namespace godot
         // Components
         RigidBody3D* body;
         Area3D* strike_area;
+        Area3D* detect_area;
         CollisionShape3D* body_collider;
         CollisionShape3D* area_collider;
+
+        // Misc
+        int last_player_id;        
     protected:
         static void _bind_methods();
     public:
@@ -30,10 +35,12 @@ namespace godot
         ~Ball() {}
 
         void _ready();
+        void _process(double delta);
 
         void serve(Vector3 p_position);
 
         void _on_strike_area_entered(Area3D* area);
+        void _on_detect_area_entered(Area3D* area);
         void _on_strike_area_exited(Area3D* area);
         void _on_player_striked(Node3D* pivot, float p_force);
         double get_serve_force() const { return serve_force; }

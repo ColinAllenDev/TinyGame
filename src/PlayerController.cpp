@@ -89,12 +89,12 @@ void PlayerController::_ready()
     player_instance = (Player*)get_parent();
     player_instance->connect("player_state_changed", Callable(this, "_on_player_state_changed"));
     player_state = player_instance->get_player_state();
+    player_id = player_instance->get_player_id();
 
     // Component and Attribute Initializaton
     Node* controller_instance = player_instance->get_node<PlayerController>("PlayerController");
     input = Input::get_singleton();
     strike_area = controller_instance->get_node<Area3D>("StrikeArea");
-    player_id = player_instance->get_player_id();
 
     // TEMPORARY
     if (player_id == 1) default_face = -1;

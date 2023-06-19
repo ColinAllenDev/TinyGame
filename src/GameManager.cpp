@@ -24,6 +24,7 @@ void GameManager::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("_on_input_request_player_join", "p_id"), &GameManager::_on_input_request_player_join);
     ClassDB::bind_method(D_METHOD("_on_player_served", "p_position", "p_direction"), &GameManager::_on_player_served);
+    ClassDB::bind_method(D_METHOD("_on_team_scored", "p_team", "p_player"), &GameManager::_on_team_scored);
 }
 
 void GameManager::_ready() 
@@ -82,6 +83,8 @@ void GameManager::add_player()
     int team = (player_id % 2) == 0 ? 0 : 1;
     player_class->set_player_team(team);
     player_class->set_player_score(0);
+    // temporary
+    player_class->set_player_state(PlayerState::Serving);
 
     PlayerController* player_controller = (PlayerController*)player_node->get_child(0);
     player_controller->set_global_position(spawns[player_id]->get_global_position());
@@ -112,8 +115,23 @@ void GameManager::_on_player_served(Vector3 p_position, Vector3 p_direction)
     game_scene->call_deferred("add_child", ball_node);
 
     Node3D* ball_node_3d = (Node3D*)ball_node;
-    ball_node_3d->set_position(p_position + p_direction);
+    ball_node_3d->set_global_position(p_position + p_direction);
+
+    // Note: may need to change this to a signal
     ball_class->serve(p_position);
+    ball_class->connect("team_scored", Callable(this, "_on_team_scored"));
+
+    // Temporary: once the player has served, the match has started
+    game_state = GameState::MatchInProgress;
+}
+
+void GameManager::_on_team_scored(int p_team, int p_player) 
+{
+    int current_score = scores.get(p_team);
+    scores.insert(p_team, current_score + 1);
+
+    UtilityFunctions::print("Player ", p_player, " from Team ", p_team, " scored!");
+    UtilityFunctions::print("Team R: ", scores.get(0), " Team L: ", scores.get(1));
 }
 
 GameState GameManager::get_game_state() const 

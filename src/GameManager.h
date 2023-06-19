@@ -40,6 +40,7 @@ namespace godot
         // Listeners
         void _on_input_request_player_join(int p_id);
         void _on_player_served(Vector3 p_position, Vector3 p_direction);
+        void _on_team_scored(int p_team, int p_player);
 
         // Getters and Setters
         GameState get_game_state() const;

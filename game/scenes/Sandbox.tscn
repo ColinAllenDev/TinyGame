@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://bd0nw8s0qrjwr"]
+[gd_scene load_steps=15 format=3 uid="uid://bd0nw8s0qrjwr"]
 
 [ext_resource type="PackedScene" uid="uid://bunya7sdm1x1q" path="res://scenes/Spawns.tscn" id="2_w7s5p"]
 [ext_resource type="Shader" path="res://shaders/water.gdshader" id="3_7skgi"]
@@ -8,6 +8,9 @@
 [ext_resource type="PackedScene" uid="uid://bhnqm4wusmnes" path="res://scenes/Beach.tscn" id="5_s3hhm"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_5dkkb"]
+size = Vector3(48, 1, 23)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mgr3b"]
 size = Vector3(48, 1, 23)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_o3ws7"]
@@ -70,13 +73,23 @@ tonemap_white = 1.55
 transform = Transform3D(1, 0, 0, 0, 0.834329, 0.551267, 0, -0.551267, 0.834329, -0.258227, 12.0956, 21.8415)
 
 [node name="Environment" type="StaticBody3D" parent="."]
+collision_layer = 5
+collision_mask = 5
+
+[node name="CourtArea" type="Area3D" parent="Environment"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+collision_layer = 4
+collision_mask = 4
+
+[node name="Court_Collider" type="CollisionShape3D" parent="Environment/CourtArea"]
+shape = SubResource("BoxShape3D_5dkkb")
+
+[node name="Surface_Collider" type="CollisionShape3D" parent="Environment"]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 5)
+shape = SubResource("BoxShape3D_mgr3b")
 
 [node name="Beach_Stage" parent="Environment" instance=ExtResource("5_s3hhm")]
 transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 5)
-
-[node name="Floor_Collider" type="CollisionShape3D" parent="Environment"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
-shape = SubResource("BoxShape3D_5dkkb")
 
 [node name="Net_Collider" type="CollisionShape3D" parent="Environment"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0012517, 1.00866, -5.92623)

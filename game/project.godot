@@ -69,6 +69,10 @@ test={
 ]
 }
 
+[physics]
+
+3d/default_linear_damp=0.0
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
