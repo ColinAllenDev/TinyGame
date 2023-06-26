@@ -69,6 +69,10 @@ test={
 ]
 }
 
+[layer_names]
+
+3d_physics/layer_1="player"
+
 [physics]
 
 3d/default_linear_damp=0.0

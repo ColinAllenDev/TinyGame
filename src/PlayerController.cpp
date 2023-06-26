@@ -11,6 +11,8 @@
 #include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/classes/area3d.hpp>
 #include <godot_cpp/classes/scene_tree_timer.hpp>
+#include <godot_cpp/classes/random_number_generator.hpp>
+#include <godot_cpp/classes/shape3d.hpp>
 #include <godot_cpp/variant/transform3d.hpp>
 #include <godot_cpp/variant/basis.hpp>
 
@@ -59,16 +61,16 @@ void PlayerController::_bind_methods()
         PropertyInfo(Variant::VECTOR3, "player_position"),
         PropertyInfo(Variant::VECTOR3, "aim_direction")));
 
-    ADD_SIGNAL(MethodInfo("player_striked", 
-        PropertyInfo(Variant::OBJECT, "pivot"),
+    ADD_SIGNAL(MethodInfo("player_striked",
+        PropertyInfo(Variant::VECTOR3, "p_to"),
         PropertyInfo(Variant::FLOAT, "p_force")));
 }
 
 PlayerController::PlayerController() 
 {
     // Action Defaults
-    strike_rate = 1;
-    strike_force = 20.0;
+    strike_rate = 0.5;
+    strike_force = 10.0;
     can_strike = true;
 
     // Movement Defaults
@@ -90,21 +92,22 @@ void PlayerController::_ready()
     player_instance->connect("player_state_changed", Callable(this, "_on_player_state_changed"));
     player_state = player_instance->get_player_state();
     player_id = player_instance->get_player_id();
+    player_team = player_instance->get_player_team();
 
     // Component and Attribute Initializaton
     Node* controller_instance = player_instance->get_node<PlayerController>("PlayerController");
     input = Input::get_singleton();
     strike_area = controller_instance->get_node<Area3D>("StrikeArea");
+    detect_area = controller_instance->get_node<Area3D>("DetectArea");
 
-    // TEMPORARY
-    if (player_id == 1) default_face = -1;
-    facing_direction = Vector3(default_face, 0, 0);
+    // Set default facing direction
+    int player_face = player_team == 0 ? 1 : -1;
+    facing_direction = Vector3(player_face, 0, 0);
+    look_at(get_global_position() + facing_direction);
 
     // Pivot
     pivot = controller_instance->get_node<Node3D>("Pivot");
-    pivot_direction = facing_direction;
-
-    look_at(get_global_position() + facing_direction);
+    pivot_direction = facing_direction; 
 }
 
 void PlayerController::_process(double delta) 
@@ -148,6 +151,8 @@ void PlayerController::handle_input()
     input_direction.y =
         input->get_action_strength("move_down_"+String::num(player_id)) - input->get_action_strength("move_up_"+String::num(player_id));
 
+    UtilityFunctions::print(input_direction.y);
+
     // Conditionals
     has_input = (input_direction.length() > 0);
     has_movement_input = (input_direction.length() > movement_deadzone*sqrt(2.0f));
@@ -189,16 +194,7 @@ void PlayerController::handle_movement(double delta)
 
 void PlayerController::handle_aiming() 
 {
-    // Handle pivot direction
-    if (has_input) 
-    {        
-        // TODO: Handle facing opposite direction of the ball
-        pivot_direction = Vector3(input_direction.x, 0.0f, input_direction.y);
-        pivot_direction = pivot_direction.clamp(Vector3(default_face, 0, -1), Vector3(default_face, 0, 1));
-
-    } else {
-        pivot_direction = Vector3(0, 1, 0);
-    }
+ 
 }
 
 void PlayerController::handle_actions() 
@@ -233,7 +229,7 @@ void PlayerController::serve()
 {
     // 1. Instantiate Ball in the air
     Vector3 serve_direction = pivot_direction;
-    Vector3 serve_offset = Vector3(1, 0, 0);
+    Vector3 serve_offset = RIGHT;
     emit_signal("player_served", get_position() + serve_direction + serve_offset, serve_direction); 
 
     // TODO: Add check if player succesfully served
@@ -242,9 +238,25 @@ void PlayerController::serve()
 
 void PlayerController::strike() 
 {
-    // Valid collision area logic performed by collision layers in godot
+    // Strike the ball if it is in range
     if (strike_area->has_overlapping_areas()) 
     {
-        emit_signal("player_striked", pivot, strike_force);
+        // TODO: Get actual court bounds from scene
+        // 1. Adjust court based on team
+        float court_adj = player_team == 0 ? -1 : 1;
+        // 2. Define court area
+        Vector3 court_bounds = Vector3(48, 0, 11);
+        // 3. Select a random point in this area
+        RandomNumberGenerator rng;
+        float x_point = rng.randf_range(0, court_bounds.x * court_adj);
+        float z_point = rng.randf_range(-court_bounds.z, court_bounds.z);
+        rng.randomize();        
+        // 4. Somehow send the ball to that point
+        Vector3 court_point = Vector3(x_point, 0, z_point);
+
+        // 5. Emit signal
+        emit_signal("player_striked", court_point, strike_force);
     }
+
+    // Do a diving-strike if not
 }

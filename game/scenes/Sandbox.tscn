@@ -8,7 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://bhnqm4wusmnes" path="res://scenes/Beach.tscn" id="5_s3hhm"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_5dkkb"]
-size = Vector3(48, 1, 23)
+size = Vector3(24, 1, 22)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_mgr3b"]
 size = Vector3(48, 1, 23)
@@ -70,19 +70,29 @@ tonemap_white = 1.55
 [node name="Spawns" parent="." instance=ExtResource("2_w7s5p")]
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.834329, 0.551267, 0, -0.551267, 0.834329, -0.258227, 12.0956, 21.8415)
+transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, -0.258227, 12.0956, 19.8415)
 
-[node name="Environment" type="StaticBody3D" parent="."]
-collision_layer = 5
-collision_mask = 5
-
-[node name="CourtArea" type="Area3D" parent="Environment"]
+[node name="CourtArea_L" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 collision_layer = 4
 collision_mask = 4
 
-[node name="Court_Collider" type="CollisionShape3D" parent="Environment/CourtArea"]
+[node name="Court_Collider_L" type="CollisionShape3D" parent="CourtArea_L"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, 0)
 shape = SubResource("BoxShape3D_5dkkb")
+
+[node name="CourtArea_R" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+collision_layer = 4
+collision_mask = 4
+
+[node name="Court_Collider_R" type="CollisionShape3D" parent="CourtArea_R"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 0)
+shape = SubResource("BoxShape3D_5dkkb")
+
+[node name="Environment" type="StaticBody3D" parent="."]
+collision_layer = 5
+collision_mask = 5
 
 [node name="Surface_Collider" type="CollisionShape3D" parent="Environment"]
 transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 5)
@@ -94,6 +104,7 @@ transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 5)
 [node name="Net_Collider" type="CollisionShape3D" parent="Environment"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0012517, 1.00866, -5.92623)
 shape = SubResource("BoxShape3D_o3ws7")
+disabled = true
 
 [node name="Water" type="MeshInstance3D" parent="Environment"]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -0.0888929, -0.585836, -0.085113)

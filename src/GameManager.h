@@ -7,6 +7,7 @@
 namespace godot 
 {
     class Player;
+    class Ball;
     class Node3D;
     class InputManager;
     class ResourceLoader;
@@ -19,6 +20,8 @@ namespace godot
     private:
         Node* game_scene;
         GameState game_state;
+        Ball* ball;
+        Node3D* marker;
         HashMap<int, int> scores;
         HashMap<int, Player*> players;
         HashMap<int, Node3D*> spawns;
@@ -40,6 +43,7 @@ namespace godot
         // Listeners
         void _on_input_request_player_join(int p_id);
         void _on_player_served(Vector3 p_position, Vector3 p_direction);
+        void _on_player_striked(Vector3 p_to, float p_force);
         void _on_team_scored(int p_team, int p_player);
 
         // Getters and Setters

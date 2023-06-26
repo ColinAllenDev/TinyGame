@@ -15,17 +15,19 @@ namespace godot
     {
         GDCLASS(PlayerController, CharacterBody3D)
     private:
-        // Instances
+        // References
         Player* player_instance;
 
         // Attributes
         int player_id;
         int player_state;
+        int player_team;
         double strike_rate;
         double strike_force;
         
         // Components
         Area3D* strike_area;
+        Area3D* detect_area;
         Node3D* pivot;
 
         // Input
@@ -53,6 +55,11 @@ namespace godot
         Vector3 movement_direction;
         Vector3 current_velocity;
         Vector3 target_velocity;
+
+        // Constants
+        const Vector3 FORWARD = Vector3(0, 0, -1);
+        const Vector3 RIGHT   = Vector3(0, 0, 1);
+        const Vector3 UP      = Vector3(0, 1, 0);
     protected:
         static void _bind_methods();
     public:

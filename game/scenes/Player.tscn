@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://dj1braoupdwvx"]
+[gd_scene load_steps=9 format=3 uid="uid://dj1braoupdwvx"]
 
 [ext_resource type="Material" uid="uid://1j6bwidm65wj" path="res://assets/materials/Player.tres" id="1_ylt6d"]
 
@@ -26,11 +26,16 @@ material = SubResource("StandardMaterial3D_h5yr6")
 radius = 1.5
 height = 3.0
 
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_u6i7n"]
+height = 0.25
+radius = 5.0
+
 [node name="Player" type="Player"]
 
 [node name="PlayerController" type="PlayerController" parent="."]
 
 [node name="Pivot" type="Node3D" parent="PlayerController"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="PlayerController/Pivot"]
 transform = Transform3D(0.999999, 0, 0, 0, -4.37113e-08, 1, 0, -0.999999, -4.37114e-08, 0, 0.65, -1)
@@ -56,3 +61,11 @@ shape = SubResource("SphereShape3D_q68b0")
 [node name="AreaMesh" type="MeshInstance3D" parent="PlayerController/StrikeArea"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, -1)
 mesh = SubResource("SphereMesh_q4eqv")
+
+[node name="DetectArea" type="Area3D" parent="PlayerController"]
+collision_layer = 4
+collision_mask = 4
+
+[node name="DetectCollider" type="CollisionShape3D" parent="PlayerController/DetectArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+shape = SubResource("CylinderShape3D_u6i7n")
