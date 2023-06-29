@@ -49,12 +49,8 @@ namespace godot
         void _on_player_striked(Vector3 p_to, float p_force);
         
         // Temporary Util Functions
-        Vector2 get_displacement(Vector3 p_target);
         Vector3 project_on_plane(Vector3 p_vector, Vector3 p_normal);
         double get_signed_angle(Vector3 p_a, Vector3 p_b, Vector3 p_axis);
-        double get_launch_velocity(Vector3 p_target);
-        double get_launch_angle(Vector3 p_target);
-       
 
         // Getters and Setters
         double get_serve_force() const { return serve_force; }

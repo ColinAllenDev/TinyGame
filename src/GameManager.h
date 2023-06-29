@@ -34,7 +34,6 @@ namespace godot
         ~GameManager() {}
 
         void _ready();
-        void _process_physics(double delta);
 
         void init_spawns();
         void add_player();

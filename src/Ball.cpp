@@ -112,34 +112,50 @@ void Ball::_on_strike_area_exited(Area3D* area) {
 
 void Ball::_on_player_striked(Vector3 p_to, float p_force) 
 {
-    //== Calculate Angle (yaw) from Ball to Court Point around Y-axis ==//
+    //== Local Variables ==//
+    Vector3 forward = get_basis()[0];
+    Vector3 up = get_basis()[1];
+
+    //== Calculate Angle (yaw) from Ball to Court Point around Y-axis ==//    
     Vector3 displacement = p_to - get_global_position();
-    float yaw_angle = get_signed_angle(displacement, Vector3(1, 0, 0), Vector3(0, 1, 0));   
-
-    //== Calculate launch velocity and pitch angle ==//
-    double velocity = get_launch_velocity(p_to);
-    double pitch_angle = get_launch_angle(p_to);
-
-    //== Rotate by angles ==//
-    Vector3 direction = Vector3(1, 0, 0);
-    direction.rotate(Vector3(0, 1, 0), yaw_angle);
-    direction.rotate(Vector3(0, 0, 1), pitch_angle);
-
+    float yaw_angle = -get_signed_angle(displacement, forward, up);   
+    rotate_y(yaw_angle);
+    
+    //== Calculate pitch angle and launch speed ==//
+    // Get y, projected x values of displacement vector
+    double d_y = displacement.y;
+    double d_x = project_on_plane(displacement, Vector3(0, 1, 0)).length(); 
+    // Get max height
+    double h = Math::max(0.5, d_y + (d_x * 0.3));
+    // Get gravity
+    double g = get_gravity_scale() * 9.8;
+    // Do some math
+    double p1 = Math::sqrt(2 * g * h);
+    double p2 = Math::sqrt(2 * g * (h - d_y));
+    double t1 = (-p1 + p2) / -g;
+    double t2 = (-p1 - p2) / -g;
+    double t = Math::max(t1, t2);
+    // Calculate pitch angle
+    double pitch_angle = Math::atan(p1 * t / d_x);
+    double speed = p1 / Math::sin(pitch_angle);
+    
+    // TODO: Move this obviously
+    if (h < 0 || (h - d_y) < 0)
+    {
+        pitch_angle = 0;
+        speed = 0;
+    }
+    
     //== Apply Transformations to Ball ==//
-    //set_linear_velocity(direction * velocity);
+    // Rotate by pitch angle
+    rotate_z(-pitch_angle);
 
-    //== Temp: Rotate Pivot ==//
-    pivot_mesh->rotate_y(yaw_angle);
-    pivot_mesh->rotate_z(pitch_angle);
-}
+    // Get forward direction
+    Vector3 basis = get_basis()[0];
+    Vector3 direction = Vector3(basis.x, basis.y, -basis.z);
 
-Vector2 Ball::get_displacement(Vector3 p_target) 
-{
-    Vector3 direction = p_target - get_global_position();
-    double d_y = direction.y;
-    double d_x = project_on_plane(direction, Vector3(0, 1, 0)).length(); 
-
-    return Vector2(d_x, d_y);
+    // Update linear velocity
+    set_linear_velocity(speed * direction);
 }
 
 Vector3 Ball::project_on_plane(Vector3 p_vector, Vector3 p_normal) 
@@ -170,46 +186,4 @@ double Ball::get_signed_angle(Vector3 p_a, Vector3 p_b, Vector3 p_axis)
     double radian = Math::acos(a_plane_n.dot(b_plane_n));
     // Return signed angle
     return radian * sign;
-}
-
-double Ball::get_launch_velocity(Vector3 p_target) 
-{
-    Vector2 d = get_displacement(p_target);
-    double h = Math::max(0.5, d.y + (d.x * 0.3));
-    double g = get_gravity_scale() * 9.8;
-
-    if (h < 0 || (h - d.y) < 0) return 0;
-
-    double p1 = Math::sqrt(2 * g * h);
-    double p2 = Math::sqrt(2 * g * (h - d.y));
-
-    double t1 = (-p1 + p2) / -g;
-    double t2 = (-p1 - p2) / -g;
-    double t = Math::max(t1, t2);
-
-    double pitch = Math::atan(p1 * t / d.x);
-    double velocity = p1 / Math::sin(pitch);
-
-    return velocity;
-}
-
-// TODO: refactor these to make sense
-double Ball::get_launch_angle(Vector3 p_target) 
-{
-    Vector2 d = get_displacement(p_target);
-    double h = Math::max(0.5, d.y + (d.x * 0.3));
-    double g = get_gravity_scale() * 9.8;
-
-    if (h < 0 || (h - d.y) < 0) return 0;
-
-    double p1 = Math::sqrt(2 * g * h);
-    double p2 = Math::sqrt(2 * g * (h - d.y));
-
-    double t1 = (-p1 + p2) / -g;
-    double t2 = (-p1 - p2) / -g;
-    double t = Math::max(t1, t2);
-
-    double pitch = Math::atan(p1 * t / d.x);
-
-    return pitch;
 }

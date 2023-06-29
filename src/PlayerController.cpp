@@ -151,8 +151,6 @@ void PlayerController::handle_input()
     input_direction.y =
         input->get_action_strength("move_down_"+String::num(player_id)) - input->get_action_strength("move_up_"+String::num(player_id));
 
-    UtilityFunctions::print(input_direction.y);
-
     // Conditionals
     has_input = (input_direction.length() > 0);
     has_movement_input = (input_direction.length() > movement_deadzone*sqrt(2.0f));
@@ -245,7 +243,7 @@ void PlayerController::strike()
         // 1. Adjust court based on team
         float court_adj = player_team == 0 ? -1 : 1;
         // 2. Define court area
-        Vector3 court_bounds = Vector3(48, 0, 11);
+        Vector3 court_bounds = Vector3(24, 0, 11);
         // 3. Select a random point in this area
         RandomNumberGenerator rng;
         float x_point = rng.randf_range(0, court_bounds.x * court_adj);
