@@ -62,8 +62,7 @@ void PlayerController::_bind_methods()
         PropertyInfo(Variant::VECTOR3, "aim_direction")));
 
     ADD_SIGNAL(MethodInfo("player_striked",
-        PropertyInfo(Variant::VECTOR3, "p_to"),
-        PropertyInfo(Variant::FLOAT, "p_force")));
+        PropertyInfo(Variant::VECTOR3, "p_to")));
 }
 
 PlayerController::PlayerController() 
@@ -253,7 +252,7 @@ void PlayerController::strike()
         Vector3 court_point = Vector3(x_point, 0, z_point);
 
         // 5. Emit signal
-        emit_signal("player_striked", court_point, strike_force);
+        emit_signal("player_striked", court_point);
     }
 
     // Do a diving-strike if not

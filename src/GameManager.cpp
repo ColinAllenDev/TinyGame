@@ -24,7 +24,7 @@ void GameManager::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("_on_input_request_player_join", "p_id"), &GameManager::_on_input_request_player_join);
     ClassDB::bind_method(D_METHOD("_on_player_served", "p_position", "p_direction"), &GameManager::_on_player_served);
-    ClassDB::bind_method(D_METHOD("_on_player_striked", "p_to", "p_force"), &GameManager::_on_player_striked);
+    ClassDB::bind_method(D_METHOD("_on_player_striked", "p_to"), &GameManager::_on_player_striked);
     ClassDB::bind_method(D_METHOD("_on_team_scored", "p_team", "p_player"), &GameManager::_on_team_scored);
 }
 
@@ -127,7 +127,7 @@ void GameManager::_on_player_served(Vector3 p_position, Vector3 p_direction)
     game_state = GameState::MatchInProgress;
 }
 
-void GameManager::_on_player_striked(Vector3 p_to, float p_force) 
+void GameManager::_on_player_striked(Vector3 p_to) 
 {
     // Instantiate marker if not done already
     if (!game_scene->has_node("Marker")) 

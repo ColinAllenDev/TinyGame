@@ -24,7 +24,7 @@ void Ball::_bind_methods()
     ClassDB::bind_method(D_METHOD("_on_strike_area_entered", "area"), &Ball::_on_strike_area_entered);
     ClassDB::bind_method(D_METHOD("_on_detect_area_entered", "area"), &Ball::_on_detect_area_entered);
     ClassDB::bind_method(D_METHOD("_on_strike_area_exited", "area"), &Ball::_on_strike_area_exited);
-    ClassDB::bind_method(D_METHOD("_on_player_striked", "p_to", "p_force"), &Ball::_on_player_striked);
+    ClassDB::bind_method(D_METHOD("_on_player_striked", "p_to"), &Ball::_on_player_striked);
 
     ClassDB::bind_method(D_METHOD("get_serve_force"), &Ball::get_serve_force);
     ClassDB::bind_method(D_METHOD("set_serve_force", "p_force"), &Ball::set_serve_force);
@@ -56,7 +56,6 @@ void Ball::_ready()
     detect_area = root_instance->get_node<Area3D>("DetectArea");
     body_collider = root_instance->get_node<CollisionShape3D>("BodyCollider");
     area_collider = strike_area->get_node<CollisionShape3D>("StrikeCollider");
-    pivot_mesh = root_instance->get_node<MeshInstance3D>("PivotMesh");
 
     // Connect signals
     strike_area->connect("area_entered", Callable(this, "_on_strike_area_entered"));
@@ -67,6 +66,8 @@ void Ball::_ready()
     set_lock_rotation_enabled(true);
 }
 
+
+// TODO: Change this logic
 void Ball::serve(Vector3 p_position) 
 {
     float target_height = 20.0;
@@ -110,42 +111,25 @@ void Ball::_on_strike_area_exited(Area3D* area) {
     }
 }
 
-void Ball::_on_player_striked(Vector3 p_to, float p_force) 
+void Ball::_on_player_striked(Vector3 p_to) 
 {
+    //== Reset Rotation ==//
+    set_rotation(Vector3(0, 0, 0));
+
     //== Local Variables ==//
-    Vector3 forward = get_basis()[0];
-    Vector3 up = get_basis()[1];
+    Vector3 forward = get_basis()[0]; // (1, 0, 0)
+    Vector3 up = get_basis()[1]; // (0, 1, 0)
 
     //== Calculate Angle (yaw) from Ball to Court Point around Y-axis ==//    
     Vector3 displacement = p_to - get_global_position();
     float yaw_angle = -get_signed_angle(displacement, forward, up);   
     rotate_y(yaw_angle);
     
-    //== Calculate pitch angle and launch speed ==//
-    // Get y, projected x values of displacement vector
-    double d_y = displacement.y;
-    double d_x = project_on_plane(displacement, Vector3(0, 1, 0)).length(); 
-    // Get max height
-    double h = Math::max(0.5, d_y + (d_x * 0.3));
-    // Get gravity
-    double g = get_gravity_scale() * 9.8;
-    // Do some math
-    double p1 = Math::sqrt(2 * g * h);
-    double p2 = Math::sqrt(2 * g * (h - d_y));
-    double t1 = (-p1 + p2) / -g;
-    double t2 = (-p1 - p2) / -g;
-    double t = Math::max(t1, t2);
-    // Calculate pitch angle
-    double pitch_angle = Math::atan(p1 * t / d_x);
-    double speed = p1 / Math::sin(pitch_angle);
-    
-    // TODO: Move this obviously
-    if (h < 0 || (h - d_y) < 0)
-    {
-        pitch_angle = 0;
-        speed = 0;
-    }
-    
+    // == Get Pitch and Speed of Ball ==//
+    double height = 10.0;
+    double pitch_angle = get_strike_pitch(displacement, up, height);
+    double speed = get_strike_speed(displacement, up, height, pitch_angle);
+
     //== Apply Transformations to Ball ==//
     // Rotate by pitch angle
     rotate_z(-pitch_angle);
@@ -156,6 +140,34 @@ void Ball::_on_player_striked(Vector3 p_to, float p_force)
 
     // Update linear velocity
     set_linear_velocity(speed * direction);
+}
+
+double Ball::get_strike_pitch(Vector3 p_displacement, Vector3 p_up, double p_height) 
+{
+    //== Calculate pitch angle and launch speed ==//
+    // Get y, projected x values of displacement vector
+    double d_y = p_displacement.y;
+    double d_x = project_on_plane(p_displacement, p_up).length();
+    // Get gravity
+    double g = get_gravity_scale() * 9.8;
+    // Do some math
+    double p1 = Math::sqrt(2 * g * p_height);
+    double p2 = Math::sqrt(2 * g * (p_height - d_y));
+    double t1 = (-p1 + p2) / -g;
+    double t2 = (-p1 - p2) / -g;
+    double t = Math::max(t1, t2);
+    // Calculate pitch angle and return
+    return Math::atan(p1 * t / d_x);
+}
+
+double Ball::get_strike_speed(Vector3 p_displacement, Vector3 p_up, double p_height, double p_angle) 
+{
+    double d_y = p_displacement.y;
+    double d_x = project_on_plane(p_displacement, p_up).length();
+    double g = get_gravity_scale() * 9.8;
+    double p1 = Math::sqrt(2 * g * p_height);
+
+    return p1 / Math::sin(p_angle);
 }
 
 Vector3 Ball::project_on_plane(Vector3 p_vector, Vector3 p_normal) 
