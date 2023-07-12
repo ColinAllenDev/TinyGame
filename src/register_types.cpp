@@ -10,6 +10,7 @@
 #include "GameManager.h"
 #include "Player.h"
 #include "PlayerController.h"
+#include "CameraController.h"
 #include "Ball.h"
 
 using namespace godot;
@@ -22,6 +23,7 @@ void initialize_module(ModuleInitializationLevel p_level)
     ClassDB::register_class<GameManager>();
     ClassDB::register_class<Player>();
     ClassDB::register_class<PlayerController>();
+    ClassDB::register_class<CameraController>();
     ClassDB::register_class<Ball>();
 }
 

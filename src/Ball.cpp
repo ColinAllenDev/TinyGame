@@ -33,6 +33,9 @@ void Ball::_bind_methods()
     ADD_SIGNAL(MethodInfo("team_scored", 
         PropertyInfo(Variant::INT, "p_team"),
         PropertyInfo(Variant::INT, "p_player")));
+
+    ADD_SIGNAL(MethodInfo("target_position_changed",
+        PropertyInfo(Variant::VECTOR3, "p_target")));
 }
 
 Ball::Ball() 
@@ -66,11 +69,10 @@ void Ball::_ready()
     set_lock_rotation_enabled(true);
 }
 
-
 // TODO: Change this logic
 void Ball::serve(Vector3 p_position) 
 {
-    float target_height = 20.0;
+    float target_height = 16.0;
     float gravity = get_gravity_scale() * 9.8;
     float velocity_y = Math::sqrt(2 * gravity * target_height);
 
@@ -80,6 +82,10 @@ void Ball::serve(Vector3 p_position)
     Vector3 velocity = Vector3(0, velocity_y, 0);
 
     apply_central_impulse(velocity);
+
+    // Temporary
+    Vector3 target_position = Vector3(get_global_position().x, target_height, get_global_position().z);
+    emit_signal("target_position_changed", target_position);
 }
 
 void Ball::_on_strike_area_entered(Area3D* area) {    
@@ -126,7 +132,7 @@ void Ball::_on_player_striked(Vector3 p_to)
     rotate_y(yaw_angle);
     
     // == Get Pitch and Speed of Ball ==//
-    double height = 10.0;
+    double height = 8.0;
     double pitch_angle = get_strike_pitch(displacement, up, height);
     double speed = get_strike_speed(displacement, up, height, pitch_angle);
 

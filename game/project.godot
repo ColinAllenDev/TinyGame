@@ -13,7 +13,15 @@ config_version=5
 config/name="TinyGame"
 run/main_scene="res://scenes/Sandbox.tscn"
 config/features=PackedStringArray("4.0", "GL Compatibility")
+run/max_fps=60
 config/icon="res://img/icon.svg"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/resizable=false
+window/stretch/mode="viewport"
 
 [dotnet]
 
@@ -73,10 +81,11 @@ test={
 
 3d_physics/layer_1="player"
 
+[navigation]
+
+3d/default_cell_size=1.0
+3d/default_edge_connection_margin=1.0
+
 [physics]
 
 3d/default_linear_damp=0.0
-
-[rendering]
-
-renderer/rendering_method="gl_compatibility"

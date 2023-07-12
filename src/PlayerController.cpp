@@ -1,6 +1,5 @@
 #include "PlayerController.h"
 #include "Player.h"
-#include "Ball.h"
 
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/classes/engine.hpp>
@@ -22,10 +21,6 @@ void PlayerController::_bind_methods()
 {
     // Attributes
     ClassDB::bind_method(D_METHOD("get_player_id"), &PlayerController::get_player_id);
-    
-    ClassDB::bind_method(D_METHOD("get_strike_force"), &PlayerController::get_strike_force);
-    ClassDB::bind_method(D_METHOD("set_strike_force", "p_force"), &PlayerController::set_strike_force);
-    ClassDB::add_property("PlayerController", PropertyInfo(Variant::FLOAT, "strike_force"), "set_strike_force", "get_strike_force");
 
     // Movement
     ClassDB::bind_method(D_METHOD("get_movement_deadzone"), &PlayerController::get_movement_deadzone);
@@ -69,15 +64,14 @@ PlayerController::PlayerController()
 {
     // Action Defaults
     strike_rate = 0.5;
-    strike_force = 10.0;
     can_strike = true;
 
     // Movement Defaults
     movement_deadzone = 0.32;
-    max_speed = 14.0f;
+    max_speed = 10.0f;
     max_acceleration = 45.0f;
-    max_fall_acceleration = 75.0f;
-    jump_impulse = 30.0f;
+    max_fall_acceleration = 60.0f;
+    jump_impulse = 18.0f;
     default_face = 1;
 }
 
@@ -85,6 +79,8 @@ void PlayerController::_ready()
 {
     // Disables component logic outside gameplay
     if (Engine::get_singleton()->is_editor_hint()) return;
+
+    // TEMPORARY: may remove later
 
     // Get relevant attributes from parent node
     player_instance = (Player*)get_parent();
@@ -97,7 +93,6 @@ void PlayerController::_ready()
     Node* controller_instance = player_instance->get_node<PlayerController>("PlayerController");
     input = Input::get_singleton();
     strike_area = controller_instance->get_node<Area3D>("StrikeArea");
-    detect_area = controller_instance->get_node<Area3D>("DetectArea");
 
     // Set default facing direction
     int player_face = player_team == 0 ? 1 : -1;
@@ -125,12 +120,18 @@ void PlayerController::_physics_process(double delta)
     {
         handle_movement(delta);
     }
+    
+    // Handle gravity regardless of state
+    if (!is_on_floor()) 
+    {
+        target_velocity.y = current_velocity.y - (max_fall_acceleration * (float)delta);
+    }
 
-    handle_aiming();
     handle_actions();
 
     // Look towards facing direction
-    if (has_input) {
+    if (has_input) 
+    {
         facing_direction = Vector3(input_direction.x, 0, input_direction.y);
     }
     look_at(get_global_position() + facing_direction);
@@ -181,17 +182,6 @@ void PlayerController::handle_movement(double delta)
         ABS(target_velocity.z - current_velocity.z) <= 
             max_speed_delta ? target_velocity.z : current_velocity.z + 
                 SIGN(target_velocity.z - current_velocity.z) * max_speed_delta;
-
-    // Update movement based on velocity
-    if (!is_on_floor()) 
-    {
-        target_velocity.y = current_velocity.y - (max_fall_acceleration * (float)delta);
-    }
-}
-
-void PlayerController::handle_aiming() 
-{
- 
 }
 
 void PlayerController::handle_actions() 
@@ -226,8 +216,7 @@ void PlayerController::serve()
 {
     // 1. Instantiate Ball in the air
     Vector3 serve_direction = pivot_direction;
-    Vector3 serve_offset = RIGHT;
-    emit_signal("player_served", get_position() + serve_direction + serve_offset, serve_direction); 
+    emit_signal("player_served", get_global_position() + serve_direction, serve_direction); 
 
     // TODO: Add check if player succesfully served
     player_instance->set_player_state(PlayerState::Moving); 
@@ -238,20 +227,27 @@ void PlayerController::strike()
     // Strike the ball if it is in range
     if (strike_area->has_overlapping_areas()) 
     {
-        // TODO: Get actual court bounds from scene
-        // 1. Adjust court based on team
-        float court_adj = player_team == 0 ? -1 : 1;
-        // 2. Define court area
-        Vector3 court_bounds = Vector3(24, 0, 11);
-        // 3. Select a random point in this area
+
+        // Define court boundaries based on player team
+        int court_adj = player_team == 0 ? -1 : 1;
+        //double min_height = 6.0;
+        Vector3 court_bounds = Vector3(12, 0, 5);
+        
+        // Check if player is facing net
+        // TODO: Change this it's a dumb way of doing things
+        if (get_basis()[0][2] < 0) 
+        {
+            court_adj = -court_adj;
+        }
+        
+        // Select a random point in this area
         RandomNumberGenerator rng;
         float x_point = rng.randf_range(0, court_bounds.x * court_adj);
+        //float y_point = rng.randf_range(min_height, court_bounds.y);
         float z_point = rng.randf_range(-court_bounds.z, court_bounds.z);
         rng.randomize();        
-        // 4. Somehow send the ball to that point
         Vector3 court_point = Vector3(x_point, 0, z_point);
-
-        // 5. Emit signal
+        // Emit signal
         emit_signal("player_striked", court_point);
     }
 

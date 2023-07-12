@@ -45,12 +45,12 @@ namespace godot
         void _on_strike_area_exited(Area3D* area);
         void _on_player_striked(Vector3 p_to);
         
-        // Temporary Util Functions
+        // Util Functions
         double get_strike_pitch(Vector3 p_displacement, Vector3 p_up, double p_height);
         double get_strike_speed(Vector3 p_displacement, Vector3 p_up, double p_height, double p_angle);
         Vector3 project_on_plane(Vector3 p_vector, Vector3 p_normal);
         double get_signed_angle(Vector3 p_a, Vector3 p_b, Vector3 p_axis);
-        
+
         // Getters and Setters
         double get_serve_force() const { return serve_force; }
         void set_serve_force(double p_force) { serve_force = p_force; }

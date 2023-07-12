@@ -26,6 +26,10 @@ void GameManager::_bind_methods()
     ClassDB::bind_method(D_METHOD("_on_player_served", "p_position", "p_direction"), &GameManager::_on_player_served);
     ClassDB::bind_method(D_METHOD("_on_player_striked", "p_to"), &GameManager::_on_player_striked);
     ClassDB::bind_method(D_METHOD("_on_team_scored", "p_team", "p_player"), &GameManager::_on_team_scored);
+
+    ADD_SIGNAL(MethodInfo("player_joined",
+        PropertyInfo(Variant::OBJECT, "p_player"), 
+        PropertyInfo(Variant::OBJECT, "p_controller")));
 }
 
 void GameManager::_ready() 
@@ -92,6 +96,7 @@ void GameManager::add_player()
     player_controller->connect("player_served", Callable(this, "_on_player_served"));
     player_controller->connect("player_striked", Callable(this, "_on_player_striked"));
 
+    emit_signal("player_joined", player_class, player_controller);
     UtilityFunctions::print("Player: ", player_class->get_player_id(), " joined on Team ", player_class->get_player_team());
 }
 
@@ -117,7 +122,7 @@ void GameManager::_on_player_served(Vector3 p_position, Vector3 p_direction)
     game_scene->call_deferred("add_child", ball_node);
 
     Node3D* ball_node_3d = (Node3D*)ball_node;
-    ball_node_3d->set_global_position(p_position + p_direction);
+    ball_node_3d->set_global_position(p_position);
 
     // Note: may need to change this to a signal
     ball->serve(p_position);

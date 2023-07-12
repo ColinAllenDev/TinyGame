@@ -23,11 +23,9 @@ namespace godot
         int player_state;
         int player_team;
         double strike_rate;
-        double strike_force;
-        
+                
         // Components
         Area3D* strike_area;
-        Area3D* detect_area;
         Node3D* pivot;
 
         // Input
@@ -56,12 +54,12 @@ namespace godot
         Vector3 current_velocity;
         Vector3 target_velocity;
 
-        // Constants
-        const Vector3 FORWARD = Vector3(0, 0, -1);
-        const Vector3 RIGHT   = Vector3(0, 0, 1);
-        const Vector3 UP      = Vector3(0, 1, 0);
     protected:
         static void _bind_methods();
+
+        void handle_input();
+        void handle_movement(double delta);
+        void handle_actions();
     public:
         PlayerController();
         ~PlayerController() {}
@@ -69,12 +67,7 @@ namespace godot
         void _ready();
         void _process(double delta);
         void _physics_process(double delta);
-        
-        void handle_input();
-        void handle_movement(double delta);
-        void handle_aiming();
-        void handle_actions();
-    
+
         void serve();
         void strike();
 
@@ -84,8 +77,6 @@ namespace godot
 
         // Getters and Setters
         int get_player_id() const { return player_id; }
-        double get_strike_force() const { return strike_force; }
-        void set_strike_force(double p_force) { strike_force = p_force; }
         double get_movement_deadzone() const { return movement_deadzone; }
         void set_movement_deadzone(const double p_movement_deadzone) { movement_deadzone = p_movement_deadzone; }
         double get_max_speed() const { return max_speed; }

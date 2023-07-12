@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bunya7sdm1x1q"]
 
-[node name="Spawns" type="Node"]
+[node name="Spawns" type="Node3D"]
 
 [node name="Spawn_L_1" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1, 1)

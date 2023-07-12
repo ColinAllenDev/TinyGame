@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=2 format=3 uid="uid://lx3mn3qqtoal"]
 
 [ext_resource type="PackedScene" uid="uid://wi0tf128ywki" path="res://assets/models/Parrot/Parrot.glb" id="1_xwpm1"]
 
