@@ -9,6 +9,7 @@ namespace godot
     {
         GDCLASS(CameraController, Camera3D);
     private:
+        Node3D* node_target;
     protected:
         static void _bind_methods();
     public:

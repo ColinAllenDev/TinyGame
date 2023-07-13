@@ -67,25 +67,24 @@ void Ball::_ready()
 
     // Temporary, may change this
     set_lock_rotation_enabled(true);
+    set_mass(0.28);
+    set_gravity_scale(3);
 }
 
 // TODO: Change this logic
 void Ball::serve(Vector3 p_position) 
 {
-    float target_height = 16.0;
-    float gravity = get_gravity_scale() * 9.8;
+    float target_height = 18.0;
+    float gravity = 9.8;
     float velocity_y = Math::sqrt(2 * gravity * target_height);
-
-    set_mass(0.28);
-    set_gravity_scale(3);
 
     Vector3 velocity = Vector3(0, velocity_y, 0);
 
     apply_central_impulse(velocity);
 
     // Temporary
-    Vector3 target_position = Vector3(get_global_position().x, target_height, get_global_position().z);
-    emit_signal("target_position_changed", target_position);
+    //Vector3 target_position = Vector3(get_global_position().x, target_height, get_global_position().z);
+    //emit_signal("target_position_changed", target_position);
 }
 
 void Ball::_on_strike_area_entered(Area3D* area) {    

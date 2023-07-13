@@ -80,7 +80,7 @@ void GameManager::add_player()
     Ref<PackedScene> player_scene = resource_loader->load("res://scenes/Player.tscn");
     Node* player_node = player_scene->instantiate();
     get_tree()->get_current_scene()->call_deferred("add_child", player_node);
-
+    
     Player* player_class = (Player*)player_node;
     player_class->set_player_id(player_id);
     players.insert(player_id, player_class);
@@ -91,8 +91,9 @@ void GameManager::add_player()
     // temporary
     player_class->set_player_state(PlayerState::Serving);
 
+    
     PlayerController* player_controller = (PlayerController*)player_node->get_child(0);
-    player_controller->set_global_position(spawns[player_id]->get_global_position());
+    player_controller->call_deferred("set_global_position", spawns[player_id]->get_global_position());
     player_controller->connect("player_served", Callable(this, "_on_player_served"));
     player_controller->connect("player_striked", Callable(this, "_on_player_striked"));
 
@@ -118,13 +119,13 @@ void GameManager::_on_player_served(Vector3 p_position, Vector3 p_direction)
 {
     Ref<PackedScene> ball_scene = resource_loader->load("res://scenes/Ball.tscn");
     Node* ball_node = ball_scene->instantiate();
-    ball = (Ball*)ball_node;
     game_scene->call_deferred("add_child", ball_node);
 
-    Node3D* ball_node_3d = (Node3D*)ball_node;
-    ball_node_3d->set_global_position(p_position);
+    Node3D* ball_node_3d = (Node3D*) ball_node;
+    ball_node_3d->call_deferred("set_global_position", p_position + p_direction);
 
     // Note: may need to change this to a signal
+    ball = (Ball*) ball_node;
     ball->serve(p_position);
     ball->connect("team_scored", Callable(this, "_on_team_scored"));
 
@@ -142,7 +143,7 @@ void GameManager::_on_player_striked(Vector3 p_to)
         game_scene->call_deferred("add_child", marker_node);
         
         marker = (Node3D*) marker_node;
-        marker->set_global_position(p_to);
+        marker->call_deferred("set_global_position", p_to);
     } else {
         // Position marker based on p_to
         marker->set_global_position(p_to);

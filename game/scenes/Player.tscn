@@ -1,11 +1,6 @@
-[gd_scene load_steps=7 format=3 uid="uid://dj1braoupdwvx"]
+[gd_scene load_steps=6 format=3 uid="uid://dj1braoupdwvx"]
 
 [ext_resource type="PackedScene" uid="uid://lx3mn3qqtoal" path="res://scenes/Parrot.tscn" id="1_oa1as"]
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_jpav2"]
-top_radius = 0.0
-bottom_radius = 0.25
-height = 1.5
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_koqa0"]
 size = Vector3(1, 1.53227, 1)
@@ -27,19 +22,11 @@ height = 3.0
 
 [node name="PlayerController" type="PlayerController" parent="."]
 
-[node name="Pivot" type="Node3D" parent="PlayerController"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="PlayerController/Pivot"]
-transform = Transform3D(0.999999, 0, 0, 0, -4.37113e-08, 1, 0, -0.999999, -4.37114e-08, 0, 0.65, -1)
-visible = false
-mesh = SubResource("CylinderMesh_jpav2")
-
 [node name="BodyCollider" type="CollisionShape3D" parent="PlayerController"]
 shape = SubResource("BoxShape3D_koqa0")
 
 [node name="Parrot" parent="PlayerController" instance=ExtResource("1_oa1as")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, -0.764899, 0)
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, -0.764899, 0)
 
 [node name="StrikeArea" type="Area3D" parent="PlayerController"]
 visible = false

@@ -49,7 +49,6 @@ namespace godot
         double jump_impulse;
         int default_face;
         Vector3 facing_direction;
-        Vector3 pivot_direction;
         Vector3 movement_direction;
         Vector3 current_velocity;
         Vector3 target_velocity;
@@ -87,7 +86,6 @@ namespace godot
         void set_max_fall_acceleration(const double p_acceleration) { max_fall_acceleration = p_acceleration; }
         double get_jump_impulse() const { return jump_impulse; }
         void set_jump_impulse(const double p_impulse) { jump_impulse = p_impulse; }
-        Node3D* get_pivot() const { return pivot; }
     };  
 }
 

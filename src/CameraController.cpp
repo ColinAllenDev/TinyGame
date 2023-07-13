@@ -31,14 +31,14 @@ void CameraController::_physics_process(double delta)
 
 void CameraController::smooth_follow() 
 {
-    //UtilityFunctions::print("Player Position: ", player_target);
+    
 }
 
 void CameraController::_on_node_added(Node* node) 
 {
     if (node->get_class() == "Ball") 
     {
-        
+        node_target = (Node3D*) node;
     }
 }
 

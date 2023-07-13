@@ -45,8 +45,6 @@ void PlayerController::_bind_methods()
     ClassDB::bind_method(D_METHOD("set_jump_impulse", "p_impulse"), &PlayerController::set_jump_impulse);
     ClassDB::add_property("PlayerController", PropertyInfo(Variant::FLOAT, "jump_impulse"), "set_jump_impulse", "get_jump_impulse");
 
-    ClassDB::bind_method(D_METHOD("get_pivot"), &PlayerController::get_pivot);
-
     // Listeners
     ClassDB::bind_method(D_METHOD("_on_player_state_changed", "p_state"), &PlayerController::_on_player_state_changed);
     ClassDB::bind_method(D_METHOD("_on_can_strike"), &PlayerController::_on_can_strike);
@@ -95,13 +93,8 @@ void PlayerController::_ready()
     strike_area = controller_instance->get_node<Area3D>("StrikeArea");
 
     // Set default facing direction
-    int player_face = player_team == 0 ? 1 : -1;
-    facing_direction = Vector3(player_face, 0, 0);
-    look_at(get_global_position() + facing_direction);
-
-    // Pivot
-    pivot = controller_instance->get_node<Node3D>("Pivot");
-    pivot_direction = facing_direction; 
+    double player_face = player_team == 0 ? 0 : 3.1459;
+    set_rotation(Vector3(0, player_face, 0));
 }
 
 void PlayerController::_process(double delta) 
@@ -130,11 +123,12 @@ void PlayerController::_physics_process(double delta)
     handle_actions();
 
     // Look towards facing direction
-    if (has_input) 
-    {
+    if (has_input)
+    {   
         facing_direction = Vector3(input_direction.x, 0, input_direction.y);
+        double angle = Math::atan2(-facing_direction.z, facing_direction.x);
+        set_rotation(Vector3(0, angle, 0));
     }
-    look_at(get_global_position() + facing_direction);
 
     // Set velocity on y axis
     current_velocity.y = target_velocity.y;
@@ -215,8 +209,8 @@ void PlayerController::handle_actions()
 void PlayerController::serve() 
 {
     // 1. Instantiate Ball in the air
-    Vector3 serve_direction = pivot_direction;
-    emit_signal("player_served", get_global_position() + serve_direction, serve_direction); 
+    Vector3 serve_direction = get_basis()[0];
+    emit_signal("player_served", get_global_position(), serve_direction); 
 
     // TODO: Add check if player succesfully served
     player_instance->set_player_state(PlayerState::Moving); 
@@ -235,7 +229,7 @@ void PlayerController::strike()
         
         // Check if player is facing net
         // TODO: Change this it's a dumb way of doing things
-        if (get_basis()[0][2] < 0) 
+        if (get_basis()[0][0] > 0) 
         {
             court_adj = -court_adj;
         }
