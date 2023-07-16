@@ -158,7 +158,9 @@ void PlayerController::handle_movement(double delta)
     if (has_movement_input) 
     {
         movement_direction = Vector3(input_direction.x, 0.0f, input_direction.y).normalized();
-    } else {
+    } 
+    else 
+    {
         movement_direction = Vector3(0.0f, 0.0f, 0.0f); 
     }
 
@@ -187,7 +189,8 @@ void PlayerController::handle_actions()
     }
 
     // Strike logic
-    if (has_strike_input && can_strike)  {
+    if (has_strike_input && can_strike)  
+    {
         //  Start action timer
         can_strike = false;
         get_tree()->create_timer(strike_rate, false)->connect("timeout", Callable(this, "_on_can_strike"));

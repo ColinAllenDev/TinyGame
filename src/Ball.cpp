@@ -74,17 +74,13 @@ void Ball::_ready()
 // TODO: Change this logic
 void Ball::serve(Vector3 p_position) 
 {
-    float target_height = 18.0;
+    float height = 18.0;
     float gravity = 9.8;
-    float velocity_y = Math::sqrt(2 * gravity * target_height);
+    float speed = Math::sqrt(2 * gravity * height);
 
-    Vector3 velocity = Vector3(0, velocity_y, 0);
+    Vector3 direction = Vector3(0, 1, 0);
 
-    apply_central_impulse(velocity);
-
-    // Temporary
-    //Vector3 target_position = Vector3(get_global_position().x, target_height, get_global_position().z);
-    //emit_signal("target_position_changed", target_position);
+    apply_central_impulse(speed * direction);
 }
 
 void Ball::_on_strike_area_entered(Area3D* area) {    
@@ -145,6 +141,9 @@ void Ball::_on_player_striked(Vector3 p_to)
 
     // Update linear velocity
     set_linear_velocity(speed * direction);
+
+    // Signals
+    emit_signal("target_position_changed", p_to);
 }
 
 double Ball::get_strike_pitch(Vector3 p_displacement, Vector3 p_up, double p_height) 

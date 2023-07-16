@@ -7,17 +7,18 @@ namespace godot
 {
     class PlayerController;
 
-    enum PlayerState {Serving, Moving};
+    enum PlayerState {Serving, Moving, Waiting};
 
     class Player : public Node3D 
     {
         GDCLASS(Player, Node3D)
     private:
         PlayerState player_state;
-        int player_id;
-        int device_id;
+        int id;
         int team;
         int score;
+        int device_id;
+        
     protected:
         static void _bind_methods();
     public:
@@ -28,8 +29,8 @@ namespace godot
 
         PlayerState get_player_state() const { return player_state; }
         void set_player_state(PlayerState p_state);
-        int get_player_id() const { return player_id; }
-        void set_player_id(const int p_id) { player_id = p_id; }
+        int get_player_id() const { return id; }
+        void set_player_id(const int p_id) { id = p_id; }
         int get_device_id() const { return device_id; }
         void set_device_id(const int p_device_id) { device_id = p_device_id; }
         int get_player_team() const { return team; }

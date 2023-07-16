@@ -9,6 +9,7 @@
 #include <godot_cpp/variant/utility_functions.hpp>
 
 #include <godot_cpp/classes/resource_loader.hpp>
+#include <godot_cpp/classes/scene_tree_timer.hpp>
 #include <godot_cpp/classes/packed_scene.hpp>
 #include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/classes/window.hpp>
@@ -42,6 +43,16 @@ void GameManager::_ready()
     // Get scene components
     game_scene = get_tree()->get_current_scene();
     input_manager = game_scene->get_node<InputManager>("InputManager");
+
+    // Initialize Game
+    init_game();
+}
+
+void GameManager::init_game() 
+{
+    // Set Attributes
+    round_start_timer = 5.0;
+    score_timer = 5.0;
 
     // Start game by awaiting players
     game_state = GameState::AwaitPlayers;
@@ -81,17 +92,14 @@ void GameManager::add_player()
     Node* player_node = player_scene->instantiate();
     get_tree()->get_current_scene()->call_deferred("add_child", player_node);
     
-    Player* player_class = (Player*)player_node;
+    Player* player_class = (Player*) player_node;
     player_class->set_player_id(player_id);
-    players.insert(player_id, player_class);
-
-    int team = (player_id % 2) == 0 ? 0 : 1;
-    player_class->set_player_team(team);
+    player_class->set_player_team(player_id % 2);
     player_class->set_player_score(0);
-    // temporary
-    player_class->set_player_state(PlayerState::Serving);
 
-    
+    players.insert(player_id, player_class);
+    team_players[player_id % 2][player_id] = player_class;
+
     PlayerController* player_controller = (PlayerController*)player_node->get_child(0);
     player_controller->call_deferred("set_global_position", spawns[player_id]->get_global_position());
     player_controller->connect("player_served", Callable(this, "_on_player_served"));
@@ -103,6 +111,34 @@ void GameManager::add_player()
 
 void GameManager::remove_player(int p_id) 
 {
+}
+
+void GameManager::start_match() 
+{
+    // Disable players from joining match once it starts
+    input_manager->disconnect("input_request_player_join", Callable(this, "_on_input_request_player_join"));
+
+    // Set initial player to serve
+    round_team = 0;
+    round_serve = 0;
+
+    // Emit signal
+    emit_signal("match_started");
+
+    // Start Round
+    get_tree()->create_timer(round_start_timer, false)->connect("timeout", Callable(this, "start_round"));
+}
+
+void GameManager::start_round() 
+{
+    
+}
+
+void GameManager::reset_round() 
+{
+    for (auto [id, player] : players) 
+    {
+    }
 }
 
 void GameManager::_on_input_request_player_join(int p_id) 
@@ -143,7 +179,7 @@ void GameManager::_on_player_striked(Vector3 p_to)
         game_scene->call_deferred("add_child", marker_node);
         
         marker = (Node3D*) marker_node;
-        marker->call_deferred("set_global_position", p_to);
+        marker->call_deferred("set_global_position", p_to + Vector3(0, 0.1, 0));
     } else {
         // Position marker based on p_to
         marker->set_global_position(p_to);
@@ -152,11 +188,20 @@ void GameManager::_on_player_striked(Vector3 p_to)
 
 void GameManager::_on_team_scored(int p_team, int p_player) 
 {
-    int current_score = scores.get(p_team);
-    scores.insert(p_team, current_score + 1);
+    int current_score = team_scores[p_team];
+    team_scores[p_team] = current_score++;
 
-    //UtilityFunctions::print("Player ", p_player, " from Team ", p_team, " scored!");
-    //UtilityFunctions::print("Team R: ", scores.get(0), " Team L: ", scores.get(1));
+    for (auto [id, player] : players) 
+    {
+        player->set_player_state(PlayerState::Waiting);
+    }
+
+    emit_signal("player_scored", players[p_player], p_team);
+
+    get_tree()->create_timer(score_timer, false)->connect("timeout", Callable(this, "reset_round"));
+
+    UtilityFunctions::print("Player ", p_player, " from Team ", p_team, " scored!");
+    UtilityFunctions::print("Team R: ", team_scores[0], " Team L: ", team_scores[1]);
 }
 
 GameState GameManager::get_game_state() const 
@@ -166,5 +211,5 @@ GameState GameManager::get_game_state() const
 
 int GameManager::get_team_score(int p_team) const 
 {
-    return scores.get(p_team);
+    return team_scores[p_team];
 }

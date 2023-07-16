@@ -21,9 +21,7 @@ void Player::_ready()
 {
     if (Engine::get_singleton()->is_editor_hint()) return;
 
-    score = 0;
-
-    UtilityFunctions::print("Player ", player_id, " joined the game!");
+    UtilityFunctions::print("Player ", id, " joined the game!");
 }
 
 void Player::set_player_state(PlayerState p_state) 
