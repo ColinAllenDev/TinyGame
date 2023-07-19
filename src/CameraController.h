@@ -11,12 +11,15 @@ namespace godot
     {
         GDCLASS(CameraController, Camera3D);
     private:
-        double min_bounds;
-        double max_bounds;
+        Vector3 initial_position;
+        Vector3 initial_rotation;
+        Vector3 min_bounds;
+        Vector3 max_bounds;
 
         Vector3 target_position;
-        double camera_speed;
         Ball* ball_target;
+        double smooth_time;
+        double camera_speed;
         bool can_follow;
     protected:
         static void _bind_methods();

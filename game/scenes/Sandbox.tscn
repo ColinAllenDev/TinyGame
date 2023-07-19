@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://bd0nw8s0qrjwr"]
+[gd_scene load_steps=19 format=3 uid="uid://bd0nw8s0qrjwr"]
 
 [ext_resource type="PackedScene" uid="uid://bunya7sdm1x1q" path="res://scenes/Spawns.tscn" id="2_w7s5p"]
 [ext_resource type="Shader" path="res://shaders/water.gdshader" id="3_7skgi"]
@@ -8,7 +8,6 @@
 [ext_resource type="Texture2D" uid="uid://26ysom5ostho" path="res://assets/textures/Water/PerlinNoise.png" id="4_j5ubr"]
 [ext_resource type="PackedScene" uid="uid://b7idpjyc8gjyx" path="res://assets/models/court.glb" id="5_qpuo3"]
 [ext_resource type="PackedScene" uid="uid://bhnqm4wusmnes" path="res://scenes/Beach.tscn" id="5_s3hhm"]
-[ext_resource type="PackedScene" uid="uid://wi0tf128ywki" path="res://assets/models/Parrot/Parrot.glb" id="9_6ql8b"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_2vy04"]
 render_priority = -1
@@ -78,26 +77,15 @@ tonemap_white = 1.55
 [node name="InputManager" type="InputManager" parent="."]
 
 [node name="Main_Camera" type="CameraController" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.912763, 0.40849, 0, -0.40849, 0.912763, -4, 10.99, 21.666)
-fov = 30.0
+transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 10, 22)
+fov = 40.0
 
 [node name="ShaderView" type="MeshInstance3D" parent="Main_Camera"]
 transform = Transform3D(3.52297, 0, 0, 0, 2.71703, -2.38419e-07, 0, 7.15256e-07, 1, 0, 0, -0.648221)
+visible = false
 mesh = SubResource("QuadMesh_c3u5o")
 
 [node name="Spawns" parent="." instance=ExtResource("2_w7s5p")]
-
-[node name="Spawn_L_1" parent="Spawns" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 1, 3)
-
-[node name="Spawn_R_1" parent="Spawns" index="1"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.06709, 1, 0)
-
-[node name="Spawn_L_2" parent="Spawns" index="2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1, -3)
-
-[node name="Spawn_R_2" parent="Spawns" index="3"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.95204, 1, 0.98643)
 
 [node name="CourtArea_L" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
@@ -148,21 +136,3 @@ directional_shadow_fade_start = 0.594
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="Environment"]
 environment = SubResource("Environment_cjral")
-
-[node name="Temp" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
-
-[node name="Parrot" parent="Temp" instance=ExtResource("9_6ql8b")]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -13, 0, 5)
-visible = false
-
-[node name="Parrot3" parent="Temp" instance=ExtResource("9_6ql8b")]
-transform = Transform3D(8.74228e-08, 0, -1, 0, 1, 0, 1, 0, 8.74228e-08, 1, 0, 2)
-
-[node name="Parrot4" parent="Temp" instance=ExtResource("9_6ql8b")]
-transform = Transform3D(8.74228e-08, 0, -1, 0, 1, 0, 1, 0, 8.74228e-08, 5, 0, 3)
-
-[node name="Parrot2" parent="Temp" instance=ExtResource("9_6ql8b")]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -6.03, 0, -1)
-
-[editable path="Spawns"]

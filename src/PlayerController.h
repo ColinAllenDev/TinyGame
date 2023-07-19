@@ -34,8 +34,8 @@ namespace godot
         Vector2 input_direction;
 
         // Conditionals
-        bool can_strike;
         bool can_move;
+        bool can_strike;
         bool has_input;
         bool has_movement_input;
         bool has_strike_input;
@@ -71,7 +71,7 @@ namespace godot
         void strike();
 
         // Action timer listeners
-        void _on_player_state_changed(int p_state) { player_state = p_state; }
+        void _on_player_state_changed(int p_state);
         void _on_can_strike() { can_strike = true; }
 
         // Getters and Setters

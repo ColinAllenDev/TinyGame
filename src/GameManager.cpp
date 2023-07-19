@@ -27,6 +27,7 @@ void GameManager::_bind_methods()
     ClassDB::bind_method(D_METHOD("_on_player_served", "p_position", "p_direction"), &GameManager::_on_player_served);
     ClassDB::bind_method(D_METHOD("_on_player_striked", "p_to"), &GameManager::_on_player_striked);
     ClassDB::bind_method(D_METHOD("_on_team_scored", "p_team", "p_player"), &GameManager::_on_team_scored);
+    ClassDB::bind_method(D_METHOD("reset_round"), &GameManager::reset_round);
 
     ADD_SIGNAL(MethodInfo("player_joined",
         PropertyInfo(Variant::OBJECT, "p_player"), 
@@ -48,18 +49,32 @@ void GameManager::_ready()
     init_game();
 }
 
+void GameManager::_process(double delta) 
+{
+    if (Engine::get_singleton()->is_editor_hint()) return;
+
+    // Note: All this is for testing purposes
+    Input* input = Input::get_singleton();
+    if(input->is_key_pressed(Key::KEY_T)) 
+    {
+        start_round();
+    }
+}
+
+
 void GameManager::init_game() 
 {
     // Set Attributes
+    round_count = 0;
     round_start_timer = 5.0;
-    score_timer = 5.0;
+    reset_timer = 5.0;
 
     // Start game by awaiting players
     game_state = GameState::AwaitPlayers;
 
-    // Initialize scores
-    scores.insert(0, 0);
-    scores.insert(1, 0);
+    // Initialize   
+    team_scores[0] = 0;
+    team_scores[1] = 0;
 
     // Initialize spawn points
     init_spawns();
@@ -73,11 +88,17 @@ void GameManager::init_game()
 
 void GameManager::init_spawns() 
 {
-    Node* spawns_node = game_scene->get_node<Node>("Spawns");
-    for (int i = 0; i < spawns_node->get_child_count(); i++) 
+    Ref<PackedScene> spawns_scene = resource_loader->load("res://scenes/Spawns.tscn");
+    Node* spawns_node = spawns_scene->instantiate();
+
+    int count = spawns_node->get_child_count();
+    for (int i = 0, j = 0; i < count; i++) 
     {
-        Node3D* spawn = (Node3D*)spawns_node->get_child(i); 
-        spawns.insert(i, spawn);
+        Node3D* spawn = (Node3D*) spawns_node->get_child(i);
+        
+        spawns[i % 2][j] = spawn->get_position();
+
+        if (i % 2 == 1) j++;
     }
 }
 
@@ -87,6 +108,7 @@ void GameManager::add_player()
     if (Engine::get_singleton()->is_editor_hint()) return;
 
     int player_id = players.size();
+    int player_team = player_id % 2;
 
     Ref<PackedScene> player_scene = resource_loader->load("res://scenes/Player.tscn");
     Node* player_node = player_scene->instantiate();
@@ -94,17 +116,16 @@ void GameManager::add_player()
     
     Player* player_class = (Player*) player_node;
     player_class->set_player_id(player_id);
-    player_class->set_player_team(player_id % 2);
+    player_class->set_player_team(player_team);
+    player_class->set_player_state(PlayerState::Waiting);
     player_class->set_player_score(0);
+    player_class->call_deferred("set_global_position", spawns[player_team][player_id]);
 
-    players.insert(player_id, player_class);
-    team_players[player_id % 2][player_id] = player_class;
-
-    PlayerController* player_controller = (PlayerController*)player_node->get_child(0);
-    player_controller->call_deferred("set_global_position", spawns[player_id]->get_global_position());
+    PlayerController* player_controller = (PlayerController*)player_node->get_child(0);    
     player_controller->connect("player_served", Callable(this, "_on_player_served"));
     player_controller->connect("player_striked", Callable(this, "_on_player_striked"));
 
+    players.insert(player_id, player_class);
     emit_signal("player_joined", player_class, player_controller);
     UtilityFunctions::print("Player: ", player_class->get_player_id(), " joined on Team ", player_class->get_player_team());
 }
@@ -118,10 +139,6 @@ void GameManager::start_match()
     // Disable players from joining match once it starts
     input_manager->disconnect("input_request_player_join", Callable(this, "_on_input_request_player_join"));
 
-    // Set initial player to serve
-    round_team = 0;
-    round_serve = 0;
-
     // Emit signal
     emit_signal("match_started");
 
@@ -131,13 +148,42 @@ void GameManager::start_match()
 
 void GameManager::start_round() 
 {
-    
+    // Set initial spawns
+    set_spawns(players[0]);
+
+    // Set serving player
+    players[0]->set_player_state(PlayerState::Serving);
 }
 
 void GameManager::reset_round() 
 {
+    // Remove leftover objects
+    ball->queue_free();
+    marker->queue_free();
+
+    // Reset spawns with player who scored last having serve
+    set_spawns(player_scored);
+
+}
+
+
+void GameManager::set_spawns(Player* p_serving) 
+{
+    int round_mod = round_count % 2;
     for (auto [id, player] : players) 
     {
+        int team = player->get_player_team();
+        if (player == p_serving) 
+        {
+            player->set_spawn_point(spawns[team][round_mod]);
+            player->respawn();
+        }
+        else
+        {
+            // Note: I try to avoid using hardcoded values. 2 = (spawns[team].length() / 2)
+            player->set_spawn_point(spawns[team][2 + round_mod]); 
+            player->respawn();
+        }
     }
 }
 
@@ -189,27 +235,18 @@ void GameManager::_on_player_striked(Vector3 p_to)
 void GameManager::_on_team_scored(int p_team, int p_player) 
 {
     int current_score = team_scores[p_team];
-    team_scores[p_team] = current_score++;
+    team_scores[p_team] = current_score + 1;
 
     for (auto [id, player] : players) 
     {
         player->set_player_state(PlayerState::Waiting);
     }
 
-    emit_signal("player_scored", players[p_player], p_team);
+    player_scored = players[p_player];
+    emit_signal("player_scored", player_scored, p_team);
 
-    get_tree()->create_timer(score_timer, false)->connect("timeout", Callable(this, "reset_round"));
+    get_tree()->create_timer(reset_timer, false)->connect("timeout", Callable(this, "reset_round"));
 
     UtilityFunctions::print("Player ", p_player, " from Team ", p_team, " scored!");
     UtilityFunctions::print("Team R: ", team_scores[0], " Team L: ", team_scores[1]);
-}
-
-GameState GameManager::get_game_state() const 
-{
-    return game_state; 
-}
-
-int GameManager::get_team_score(int p_team) const 
-{
-    return team_scores[p_team];
 }

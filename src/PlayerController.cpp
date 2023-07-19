@@ -62,6 +62,7 @@ PlayerController::PlayerController()
 {
     // Action Defaults
     strike_rate = 0.5;
+    can_move = true;
     can_strike = true;
 
     // Movement Defaults
@@ -71,14 +72,18 @@ PlayerController::PlayerController()
     max_fall_acceleration = 60.0f;
     jump_impulse = 18.0f;
     default_face = 1;
+
+    // Conditional Defaults
+    has_input = false;
+    has_strike_input = false;
+    has_jump_input = false;
+    has_movement_input = false;
 }
 
 void PlayerController::_ready() 
 {
     // Disables component logic outside gameplay
     if (Engine::get_singleton()->is_editor_hint()) return;
-
-    // TEMPORARY: may remove later
 
     // Get relevant attributes from parent node
     player_instance = (Player*)get_parent();
@@ -108,33 +113,11 @@ void PlayerController::_physics_process(double delta)
 {
     if (Engine::get_singleton()->is_editor_hint()) return;
 
-    // Handle movmenet, aiming, and actions
-    if(player_state == PlayerState::Moving) 
-    {
+    if(can_move) 
         handle_movement(delta);
-    }
     
-    // Handle gravity regardless of state
-    if (!is_on_floor()) 
-    {
-        target_velocity.y = current_velocity.y - (max_fall_acceleration * (float)delta);
-    }
 
     handle_actions();
-
-    // Look towards facing direction
-    if (has_input)
-    {   
-        facing_direction = Vector3(input_direction.x, 0, input_direction.y);
-        double angle = Math::atan2(-facing_direction.z, facing_direction.x);
-        set_rotation(Vector3(0, angle, 0));
-    }
-
-    // Set velocity on y axis
-    current_velocity.y = target_velocity.y;
-
-    set_velocity(current_velocity);
-    move_and_slide();
 }
 
 void PlayerController::handle_input() 
@@ -178,6 +161,17 @@ void PlayerController::handle_movement(double delta)
         ABS(target_velocity.z - current_velocity.z) <= 
             max_speed_delta ? target_velocity.z : current_velocity.z + 
                 SIGN(target_velocity.z - current_velocity.z) * max_speed_delta;
+
+    // Handle vertical velocity
+    if (!is_on_floor()) 
+    {
+        target_velocity.y = current_velocity.y - (max_fall_acceleration * (float)delta);
+    }
+
+    current_velocity.y = target_velocity.y;
+
+    set_velocity(current_velocity);
+    move_and_slide();
 }
 
 void PlayerController::handle_actions() 
@@ -196,7 +190,7 @@ void PlayerController::handle_actions()
         get_tree()->create_timer(strike_rate, false)->connect("timeout", Callable(this, "_on_can_strike"));
 
         // Player is serving
-        if (player_state == PlayerState::Serving && is_on_floor())     
+        if (player_state == PlayerState::Serving)     
         {
             serve();
         }
@@ -249,4 +243,14 @@ void PlayerController::strike()
     }
 
     // Do a diving-strike if not
+}
+
+void PlayerController::_on_player_state_changed(int p_state)
+{ 
+    player_state = p_state; 
+
+    if (p_state == PlayerState::Moving || p_state == PlayerState::Waiting)
+        can_move = true;
+    else 
+        can_move = false;
 }

@@ -19,7 +19,9 @@ namespace godot
     private:
         // Attributes
         double serve_force;
-        double max_height;
+        double serve_height;
+        double max_strike_height;
+        double min_strike_height;
 
         // Components
         RigidBody3D* body;
@@ -27,6 +29,9 @@ namespace godot
         Area3D* detect_area;
         CollisionShape3D* body_collider;
         CollisionShape3D* area_collider;
+
+        // Conditionals
+        bool can_score;
 
         // Misc
         int last_player_id;
@@ -54,6 +59,7 @@ namespace godot
         // Getters and Setters
         double get_serve_force() const { return serve_force; }
         void set_serve_force(double p_force) { serve_force = p_force; }
+        void set_can_score(bool p_value) { can_score = p_value; }
     };
 }
 

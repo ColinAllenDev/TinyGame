@@ -14,6 +14,7 @@
 #include <godot_cpp/classes/collision_shape3d.hpp>
 #include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/classes/physics_direct_body_state3d.hpp>
+#include <godot_cpp/classes/random_number_generator.hpp>
 
 using namespace godot;
 
@@ -41,7 +42,10 @@ void Ball::_bind_methods()
 Ball::Ball() 
 {
     serve_force = 12.0;
-    max_height = 2.0;
+    min_strike_height = 4.0;
+    max_strike_height = 6.0;
+
+    can_score = true;
 }
 
 void Ball::_ready()
@@ -94,11 +98,14 @@ void Ball::_on_strike_area_entered(Area3D* area) {
 
 void Ball::_on_detect_area_entered(Area3D* area) 
 {
-    // TODO: change this
-    Vector3 hit_position = area->get_global_position();
-    int team_number = hit_position.x > 0 ? 0 : 1;
-
-    emit_signal("team_scored", team_number, last_player_id);
+    set_lock_rotation_enabled(false);
+    
+    if (can_score) 
+    {
+        int team_number = area->get_global_position().x > 0 ? 0 : 1;
+        emit_signal("team_scored", team_number, last_player_id);
+        can_score = false;
+    }
 }
 
 void Ball::_on_strike_area_exited(Area3D* area) {
@@ -112,6 +119,7 @@ void Ball::_on_strike_area_exited(Area3D* area) {
     }
 }
 
+// TODO: Fix bug with hitting net at targets close to center
 void Ball::_on_player_striked(Vector3 p_to) 
 {
     //== Reset Rotation ==//
@@ -127,7 +135,9 @@ void Ball::_on_player_striked(Vector3 p_to)
     rotate_y(yaw_angle);
     
     // == Get Pitch and Speed of Ball ==//
-    double height = 8.0;
+    RandomNumberGenerator rng;
+    double height = rng.randf_range(min_strike_height, max_strike_height);
+    rng.randomize();
     double pitch_angle = get_strike_pitch(displacement, up, height);
     double speed = get_strike_speed(displacement, up, height, pitch_angle);
 

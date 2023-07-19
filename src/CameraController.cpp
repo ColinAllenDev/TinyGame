@@ -19,15 +19,16 @@ void CameraController::_ready()
     if (Engine::get_singleton()->is_editor_hint()) return;
 
     target_position = get_global_position();
+    smooth_time = 0.0;
     camera_speed = 0.025;
-    min_bounds = -4.0;
-    max_bounds = 4.0;
+    min_bounds.x = -4.0;
+    max_bounds.x = 4.0;
 
     SceneTree* main_scene = get_tree();
     main_scene->connect("node_added", Callable(this, "_on_node_added"));
 }
 
-double t = 0.0;
+
 void CameraController::_physics_process(double delta) 
 {
     if (Engine::get_singleton()->is_editor_hint()) return;
@@ -40,13 +41,13 @@ void CameraController::_physics_process(double delta)
 
 void CameraController::smooth_follow(double delta) 
 {
-    t += delta * camera_speed;
+    smooth_time += delta * camera_speed;
     Vector3 initial_position = get_global_position();
-    set_global_position(initial_position.lerp(target_position, t));
+    set_global_position(initial_position.lerp(target_position, smooth_time));
 
     if (initial_position == target_position) 
     {
-        t = 0.0;
+        smooth_time = 0.0;
         can_follow = false;
     }
 }
@@ -59,12 +60,19 @@ void CameraController::_on_node_added(Node* node)
         ball_target->connect("target_position_changed", Callable(this, "_on_target_position_changed"));
     }
 }
-
+/* 
+Notes:
+ Camera pans in from opposite side of serve
+ Camera doesnt move while serving unless player jumps to strike. 
+ Camera doesnt follow ball vertically
+*/
 void CameraController::_on_target_position_changed(Vector3 p_target) 
 {
     Vector3 initial_position = get_global_position();
     double target_x = p_target.x;
+    double min_bounds_x = min_bounds.x; // I don't know why it makes us do this.
+    double max_bounds_x = max_bounds.x;
 
-    target_position = Vector3(Math::clamp(target_x, min_bounds, max_bounds), initial_position.y, initial_position.z);
+    target_position = Vector3(Math::clamp(target_x, min_bounds_x, max_bounds_x), initial_position.y, initial_position.z);
     can_follow = true;
 }

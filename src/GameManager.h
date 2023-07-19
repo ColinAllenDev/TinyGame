@@ -18,31 +18,30 @@ namespace godot
     {
         GDCLASS(GameManager, Node)
     private:
-        // Attributes
+        // Data
+        GameState game_state;
+        uint round_count;
         double round_start_timer;
-        double score_timer;
+        double reset_timer;
+        int team_scores[2];
 
         // References
-        HashMap<int, Player*> players;
-        Player* team_players[2][2];
-        int team_scores[2];
-        int round_team;
-        int round_serve;
-
-        // Components
         Node* game_scene;
-        GameState game_state;
+        HashMap<int, Player*> players;
+        Player* player_scored;
         Ball* ball;
         Node3D* marker;
-        HashMap<int, Node3D*> spawns;
+        Vector3 spawns[2][4];
         InputManager* input_manager;
         ResourceLoader* resource_loader;
+        
     protected:
         static void _bind_methods();
     public:
         GameManager() {}
         ~GameManager() {}
 
+        void _process(double delta);
         void _ready();
 
         void init_game();
@@ -54,6 +53,8 @@ namespace godot
         void start_round();
         void reset_round();
 
+        void set_spawns(Player* p_serving);
+
         // Listeners
         void _on_input_request_player_join(int p_id);
         void _on_player_served(Vector3 p_position, Vector3 p_direction);
@@ -61,8 +62,8 @@ namespace godot
         void _on_team_scored(int p_team, int p_player);
 
         // Getters and Setters
-        GameState get_game_state() const;
-        int get_team_score(int p_team) const;
+        GameState get_game_state() const { return game_state; }
+        int get_team_score(int p_team) const { return team_scores[p_team]; }
     };
 }
 

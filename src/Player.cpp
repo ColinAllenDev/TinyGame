@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "PlayerController.h"
 
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
@@ -21,7 +22,12 @@ void Player::_ready()
 {
     if (Engine::get_singleton()->is_editor_hint()) return;
 
-    UtilityFunctions::print("Player ", id, " joined the game!");
+    player_controller = (PlayerController*) get_child(0);
+}
+
+void Player::respawn() 
+{
+    player_controller->set_global_position(spawn_point);
 }
 
 void Player::set_player_state(PlayerState p_state) 
